@@ -565,6 +565,7 @@ def build_dataset() -> dict[str, Any]:
             [
                 "city",
                 "segment",
+                "grading",
                 "quarter",
                 "quarter_sort",
                 "project_id",
@@ -1892,42 +1893,56 @@ def build_html(dataset: dict[str, Any]) -> str:
       }});
     }}
 
-    function deepDimensionRows(dimensionType) {{
-      const metricKey = state.flowMetric;
-      const rows = filteredDimensionRecordsFor(state.deepCity, state.deepSegment, dimensionType);
-      if (dimensionType === "developer") {{
-        const labels = dimensionQuarterLabels(state.deepCity, state.deepSegment, dimensionType);
-        const latestQuarter = labels[labels.length - 1];
-        const latestRows = rows.filter((row) => row.quarter === latestQuarter);
-        const totals = new Map();
-        latestRows.forEach((row) => {{
-          totals.set(row.dimension_value, (totals.get(row.dimension_value) || 0) + Number(row[metricKey] ?? 0));
-        }});
-        const ordered = [...totals.entries()].sort((a, b) => b[1] - a[1]);
-        const topFive = ordered.slice(0, 5).map(([dimension_value, value]) => ({{
+    function developerPieRows(rows, metricKey) {{
+      const labels = dimensionQuarterLabels(state.deepCity, state.deepSegment, "developer");
+      const latestQuarter = labels[labels.length - 1];
+      const latestRows = rows.filter((row) => row.quarter === latestQuarter);
+      const totals = new Map();
+      latestRows.forEach((row) => {{
+        totals.set(row.dimension_value, (totals.get(row.dimension_value) || 0) + Number(row[metricKey] ?? 0));
+      }});
+      const ordered = [...totals.entries()].sort((a, b) => b[1] - a[1]);
+      const masteriseIndex = ordered.findIndex(
+        ([label]) => String(label).trim().toLowerCase() === "masterise homes"
+      );
+      let selected = ordered.slice(0, 5);
+      if (masteriseIndex >= 5) {{
+        selected = [...selected.slice(0, 4), ordered[masteriseIndex]];
+      }}
+      const selectedLabels = new Set(selected.map(([label]) => label));
+      const otherValue = ordered
+        .filter(([label]) => !selectedLabels.has(label))
+        .reduce((sum, [, value]) => sum + value, 0);
+      const pieRows = selected.map(([dimension_value, value]) => ({{
+        quarter: latestQuarter,
+        market: state.deepCity,
+        segment: state.deepSegment,
+        dimension_type: "developer",
+        dimension_value,
+        flow_metric: metricLabels[metricKey],
+        value,
+        grouping: "Selected",
+      }}));
+      if (otherValue > 0) {{
+        pieRows.push({{
           quarter: latestQuarter,
           market: state.deepCity,
           segment: state.deepSegment,
           dimension_type: "developer",
-          dimension_value,
+          dimension_value: "Other",
           flow_metric: metricLabels[metricKey],
-          value,
-          grouping: "Top 5",
-        }}));
-        const otherValue = ordered.slice(5).reduce((sum, [, value]) => sum + value, 0);
-        if (otherValue > 0) {{
-          topFive.push({{
-            quarter: latestQuarter,
-            market: state.deepCity,
-            segment: state.deepSegment,
-            dimension_type: "developer",
-            dimension_value: "Other",
-            flow_metric: metricLabels[metricKey],
-            value: otherValue,
-            grouping: "Other",
-          }});
-        }}
-        return topFive;
+          value: otherValue,
+          grouping: "Other",
+        }});
+      }}
+      return pieRows;
+    }}
+
+    function deepDimensionRows(dimensionType) {{
+      const metricKey = state.flowMetric;
+      const rows = filteredDimensionRecordsFor(state.deepCity, state.deepSegment, dimensionType);
+      if (dimensionType === "developer") {{
+        return developerPieRows(rows, metricKey);
       }}
       return rows.map((row) => {{
         return {{
@@ -2011,6 +2026,7 @@ def build_html(dataset: dict[str, Any]) -> str:
         return {{
           project_name: point.project_name,
           developer: point.developer || "",
+          grading: point.grading || "",
           market: point.city,
           segment: point.segment,
           quarter: point.quarter,
@@ -2142,7 +2158,7 @@ def build_html(dataset: dict[str, Any]) -> str:
         const button = document.createElement("button");
         button.type = "button";
         button.className = "export-button";
-        button.textContent = "Download CSV";
+        button.textContent = "CSV";
         button.addEventListener("click", () => {{
           const payload = exportPayloadFor(key);
           if (!payload) {{
@@ -2272,6 +2288,46 @@ def build_html(dataset: dict[str, Any]) -> str:
       }}
       charts[chartId] = new Chart(document.getElementById(chartId), config);
     }}
+
+    const piePercentageLabelPlugin = {{
+      id: "piePercentageLabelPlugin",
+      afterDatasetsDraw(chart) {{
+        if (chart.config.type !== "pie") {{
+          return;
+        }}
+        const dataset = chart.data.datasets?.[0];
+        const meta = chart.getDatasetMeta(0);
+        if (!dataset || !meta?.data?.length) {{
+          return;
+        }}
+        const values = (dataset.data || []).map((value) => Number(value) || 0);
+        const total = values.reduce((sum, value) => sum + value, 0);
+        if (!total) {{
+          return;
+        }}
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.font = "700 11px Arial";
+        ctx.fillStyle = "#293537";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        meta.data.forEach((element, index) => {{
+          const value = values[index];
+          if (!value) {{
+            return;
+          }}
+          const share = (value / total) * 100;
+          if (share < 4) {{
+            return;
+          }}
+          const position = element.tooltipPosition();
+          const x = (position.x + chart.chartArea.left + chart.chartArea.right) / 3;
+          const y = (position.y + chart.chartArea.top + chart.chartArea.bottom) / 3;
+          ctx.fillText(`${{share.toFixed(1)}}%`, x, y);
+        }});
+        ctx.restore();
+      }},
+    }};
 
     function baseLineOptions(metricKey, yLabel, stacked = false) {{
       return {{
@@ -2565,22 +2621,9 @@ def build_html(dataset: dict[str, Any]) -> str:
       const metricKey = state.flowMetric;
       let records = filteredDimensionRecordsFor(state.deepCity, state.deepSegment, dimensionType);
       if (dimensionType === "developer") {{
-        const labels = dimensionQuarterLabels(state.deepCity, state.deepSegment, dimensionType);
-        const latestQuarter = labels[labels.length - 1];
-        const latestRecords = records.filter((row) => row.quarter === latestQuarter);
-        const totals = new Map();
-        latestRecords.forEach((row) => {{
-          totals.set(row.dimension_value, (totals.get(row.dimension_value) || 0) + Number(row[metricKey] ?? 0));
-        }});
-        const ordered = [...totals.entries()].sort((a, b) => b[1] - a[1]);
-        const topFive = ordered.slice(0, 5);
-        const otherTotal = ordered.slice(5).reduce((sum, [, value]) => sum + value, 0);
-        const pieLabels = topFive.map(([label]) => label);
-        const pieData = topFive.map(([, value]) => value);
-        if (otherTotal > 0) {{
-          pieLabels.push("Other");
-          pieData.push(otherTotal);
-        }}
+        const pieRows = developerPieRows(records, metricKey);
+        const pieLabels = pieRows.map((row) => row.dimension_value);
+        const pieData = pieRows.map((row) => row.value);
         buildOrReplaceChart(chartId, {{
           type: "pie",
           data: {{
@@ -2592,6 +2635,7 @@ def build_html(dataset: dict[str, Any]) -> str:
               borderWidth: 2,
             }}],
           }},
+          plugins: [piePercentageLabelPlugin],
           options: {{
             responsive: true,
             maintainAspectRatio: false,
@@ -2611,7 +2655,9 @@ def build_html(dataset: dict[str, Any]) -> str:
                 padding: 12,
                 callbacks: {{
                   label(context) {{
-                    return `${{context.label}}: ${{formatNumber(context.parsed, metricKind(metricKey))}}`;
+                    const total = pieData.reduce((sum, value) => sum + Number(value || 0), 0);
+                    const share = total ? (Number(context.parsed || 0) / total) * 100 : null;
+                    return `${{context.label}}: ${{formatNumber(context.parsed, metricKind(metricKey))}} (${{formatNumber(share, "percent")}})`;
                   }},
                 }},
               }},
@@ -2819,6 +2865,10 @@ def build_html(dataset: dict[str, Any]) -> str:
       }});
     }}
 
+    function gradingColorForPoint(point) {{
+      return gradingColors[point.grading] || "#A0A7B4";
+    }}
+
     function ensureMap() {{
       if (!projectMap) {{
         projectMap = L.map("projectMap", {{ zoomControl: true }}).setView([16.1, 106.2], 6);
@@ -2855,12 +2905,19 @@ def build_html(dataset: dict[str, Any]) -> str:
           return;
         }}
         bounds.push([lat, lng]);
-        const marker = L.marker([lat, lng]).addTo(projectMap);
+        const marker = L.circleMarker([lat, lng], {{
+          radius: 8,
+          color: "#ffffff",
+          weight: 2,
+          fillColor: gradingColorForPoint(point),
+          fillOpacity: 0.92,
+        }}).addTo(projectMap);
         const quarterlySoldRate = quarterlySoldRateForPoint(point);
         const accumulatedSoldRate = accumulatedSoldRateForPoint(point);
         marker.bindPopup(`
           <strong>${{point.project_name}}</strong><br />
           Developer: ${{point.developer || "-"}}<br />
+          Grading: ${{point.grading || "-"}}<br />
           Quarter: ${{point.quarter}}<br />
           New launched: ${{formatNumber(point.new_launched)}}<br />
           New sold: ${{formatNumber(point.new_sold, "decimal")}}<br />
