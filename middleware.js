@@ -51,6 +51,23 @@ async function isValidSession(token, secret) {
   return expectedSignature === providedSignature;
 }
 
+function readCookieValue(request, key) {
+  const cookieHeader = request.headers.get("cookie");
+  if (!cookieHeader) {
+    return "";
+  }
+
+  const pairs = cookieHeader.split(";");
+  for (const pair of pairs) {
+    const [name, ...rest] = pair.trim().split("=");
+    if (name === key) {
+      return rest.join("=");
+    }
+  }
+
+  return "";
+}
+
 export default async function middleware(request) {
   const url = new URL(request.url);
   const pathname = url.pathname;
@@ -60,7 +77,7 @@ export default async function middleware(request) {
     return new Response("Missing SESSION_SECRET environment variable.", { status: 500 });
   }
 
-  const token = request.cookies.get("dashboard_session")?.value;
+  const token = readCookieValue(request, "dashboard_session");
   const authenticated = await isValidSession(token, sessionSecret);
 
   if (pathname === "/login" || pathname === "/login.html") {
