@@ -894,6 +894,34 @@ def build_html(dataset: dict[str, Any]) -> str:
       align-items: baseline;
       margin-bottom: 12px;
     }}
+    .panel[data-export-key] {{
+      position: relative;
+    }}
+    .panel[data-export-key] .chart-head {{
+      padding-right: 116px;
+    }}
+    .export-button {{
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      border: 1px solid rgba(76, 135, 204, 0.24);
+      background: var(--panel-2);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      z-index: 2;
+    }}
+    .export-button:hover {{
+      transform: translateY(-1px);
+      border-color: rgba(58, 124, 235, 0.36);
+      box-shadow: 0 10px 20px rgba(58, 124, 235, 0.12);
+    }}
     .chart-title {{
       margin: 0;
       font-size: 18px;
@@ -1151,14 +1179,14 @@ def build_html(dataset: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="compare-grid">
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="flow-compare">
           <div class="chart-head">
             <h3 class="chart-title" id="flowCompareTitle">Flow Comparison</h3>
             <span class="chart-note">Total market view</span>
           </div>
           <div class="canvas-wrap"><canvas id="chartFlowCompare"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="latest-snapshot">
           <div class="chart-head">
             <h3 class="chart-title">Latest Quarter Snapshot</h3>
             <span class="chart-note">Fast read on current quarter totals</span>
@@ -1176,21 +1204,21 @@ def build_html(dataset: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="price-grid">
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="hanoi-breakdown">
           <div class="chart-head">
             <h3 class="chart-title">Hanoi Breakdown</h3>
             <span class="chart-note" id="hanoiBreakdownNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartHanoiBreakdown"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="hcmc-breakdown">
           <div class="chart-head">
             <h3 class="chart-title">HCMC Breakdown</h3>
             <span class="chart-note" id="hcmcBreakdownNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartHcmcBreakdown"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="segment-mix-table">
           <div class="chart-head">
             <h3 class="chart-title">Segment Mix Table</h3>
             <span class="chart-note">Latest quarter by selected flow metric</span>
@@ -1220,35 +1248,35 @@ def build_html(dataset: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="price-grid">
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="price-current-compare">
           <div class="chart-head">
             <h3 class="chart-title">Weighted Price by Current Supply</h3>
             <span class="chart-note">Total Hanoi vs total HCMC</span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartPriceCurrentCompare"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="price-available-compare">
           <div class="chart-head">
             <h3 class="chart-title">Weighted Price by Available Supply</h3>
             <span class="chart-note">Total Hanoi vs total HCMC</span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartPriceAvailableCompare"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="new-project-compare">
           <div class="chart-head">
             <h3 class="chart-title">Average Price of New Projects</h3>
             <span class="chart-note">First-launch project cohorts</span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartNewProjectCompare"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="sold-rate-quarterly-compare">
           <div class="chart-head">
             <h3 class="chart-title">Quarterly Sold Rate</h3>
             <span class="chart-note">New sold / current for sale at the beginning</span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartSoldRateQuarterlyCompare"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="sold-rate-cumulative-compare">
           <div class="chart-head">
             <h3 class="chart-title">Cumulative Sold Rate</h3>
             <span class="chart-note">Current sold-out / (current supply + previous quarter available end)</span>
@@ -1266,70 +1294,70 @@ def build_html(dataset: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="deep-grid">
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="deep-current-price">
           <div class="chart-head">
             <h3 class="chart-title">Segment Weighted Price by Current Supply</h3>
             <span class="chart-note" id="deepCurrentNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepCurrentPrice"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="deep-available-price">
           <div class="chart-head">
             <h3 class="chart-title">Segment Weighted Price by Available Supply</h3>
             <span class="chart-note" id="deepAvailableNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepAvailablePrice"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="deep-new-project-price">
           <div class="chart-head">
             <h3 class="chart-title">Segment New Project Avg Price</h3>
             <span class="chart-note" id="deepNewProjectNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepNewProjectPrice"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="deep-new-projects">
           <div class="chart-head">
             <h3 class="chart-title">Segment New Projects</h3>
             <span class="chart-note">First positive launch quarter count</span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepNewProjects"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="deep-sold-rate-quarterly">
           <div class="chart-head">
             <h3 class="chart-title">Segment Sold Rate</h3>
             <span class="chart-note" id="deepSoldRateQuarterlyNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepSoldRateQuarterly"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="deep-sold-rate-cumulative">
           <div class="chart-head">
             <h3 class="chart-title">Segment Cumulative Sold Rate</h3>
             <span class="chart-note" id="deepSoldRateCumulativeNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepSoldRateCumulative"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="deep-grading-mix">
           <div class="chart-head">
             <h3 class="chart-title">Flow Mix by Grading</h3>
             <span class="chart-note" id="deepGradingMixNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepGradingMix"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="deep-region-mix">
           <div class="chart-head">
             <h3 class="chart-title">Flow Mix by Region</h3>
             <span class="chart-note" id="deepRegionMixNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepRegionMix"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="deep-developer-mix">
           <div class="chart-head">
             <h3 class="chart-title">Flow Mix by Developer</h3>
             <span class="chart-note" id="deepDeveloperMixNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepDeveloperMix"></canvas></div>
         </article>
-        <article class="panel table-card">
+        <article class="panel table-card" data-export-key="deep-quarterly-table">
           <div class="chart-head">
             <h3 class="chart-title">Deep Dive Quarterly Table</h3>
             <span class="chart-note">Selected market and segment</span>
@@ -1378,14 +1406,14 @@ def build_html(dataset: dict[str, Any]) -> str:
           </article>
         </div>
         <div class="map-chart-grid">
-          <article class="panel chart-card">
+          <article class="panel chart-card" data-export-key="map-launch-segment">
             <div class="chart-head">
               <h3 class="chart-title">New Launched by Segment</h3>
               <span class="chart-note" id="mapLaunchChartNote"></span>
             </div>
             <div class="canvas-wrap small"><canvas id="chartMapLaunchSegment"></canvas></div>
           </article>
-          <article class="panel chart-card">
+          <article class="panel chart-card" data-export-key="map-sold-segment">
             <div class="chart-head">
               <h3 class="chart-title">New Sold by Segment</h3>
               <span class="chart-note" id="mapSoldChartNote"></span>
@@ -1395,14 +1423,14 @@ def build_html(dataset: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="map-shell">
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="project-map">
           <div class="chart-head">
             <h3 class="chart-title">Project Map</h3>
             <span class="chart-note" id="mapNote"></span>
           </div>
           <div id="projectMap"></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-key="active-project-list">
           <div class="chart-head">
             <h3 class="chart-title">Active Project List</h3>
             <span class="chart-note">Mapped projects in the latest quarter available in the source</span>
@@ -1420,7 +1448,7 @@ def build_html(dataset: dict[str, Any]) -> str:
       </div>
     </section>
 
-    <section class="panel table-card">
+    <section class="panel table-card" data-export-key="quarterly-compare-table">
       <div class="chart-head">
         <h3 class="chart-title">Quarterly Compare Table</h3>
         <span class="chart-note">Total Hanoi and total HCMC side by side</span>
@@ -1752,6 +1780,378 @@ def build_html(dataset: dict[str, Any]) -> str:
         return null;
       }}
       return ((currentValue - previousValue) / previousValue) * 100;
+    }}
+
+    function sanitizeFilename(value) {{
+      return String(value ?? "export")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "export";
+    }}
+
+    function csvCell(value) {{
+      if (value === null || value === undefined) {{
+        return "";
+      }}
+      const text = String(value);
+      if (/[",\\n]/.test(text)) {{
+        return `"${{text.replace(/"/g, '""')}}"`;
+      }}
+      return text;
+    }}
+
+    function downloadRowsAsCsv(filename, rows) {{
+      const safeRows = rows.length ? rows : [{{ note: "No data available" }}];
+      const headers = [...new Set(safeRows.flatMap((row) => Object.keys(row)))];
+      const lines = [
+        headers.map(csvCell).join(","),
+        ...safeRows.map((row) => headers.map((header) => csvCell(row[header])).join(",")),
+      ];
+      const blob = new Blob([lines.join("\\n")], {{ type: "text/csv;charset=utf-8;" }});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }}
+
+    function timeframeSlug() {{
+      return `${{state.startQuarter}}_to_${{state.endQuarter}}`;
+    }}
+
+    function latestSnapshotRows() {{
+      return ["Hanoi", "HCMC"].map((city) => {{
+        const latest = latestRecord(city, "Total");
+        return {{
+          market: city,
+          quarter: latest?.quarter ?? "",
+          flow_metric: metricLabels[state.flowMetric],
+          value: latest?.[state.flowMetric] ?? null,
+        }};
+      }});
+    }}
+
+    function compareMetricRows(metricKey) {{
+      const labels = unionQuarterLabels([["Hanoi", "Total"], ["HCMC", "Total"]]);
+      return labels.flatMap((quarter) => {{
+        return ["Hanoi", "HCMC"].map((city) => {{
+          const row = filteredRecordsFor(city, "Total").find((item) => item.quarter === quarter);
+          return {{
+            quarter,
+            market: city,
+            metric: metricLabels[metricKey],
+            value: row?.[metricKey] ?? null,
+          }};
+        }});
+      }});
+    }}
+
+    function breakdownRows(city, segments) {{
+      const labels = unionQuarterLabels(segments.map((segment) => [city, segment]));
+      return labels.flatMap((quarter) => segments.map((segment) => {{
+        const row = filteredRecordsFor(city, segment).find((item) => item.quarter === quarter);
+        return {{
+          quarter,
+          market: city,
+          segment,
+          flow_metric: metricLabels[state.flowMetric],
+          value: row?.[state.flowMetric] ?? null,
+        }};
+      }}));
+    }}
+
+    function segmentMixRows() {{
+      return [
+        ["Hanoi", ["Central Hanoi", "Van Giang HY"]],
+        ["HCMC", ["Central HCMC", "Binh Duong", "BR-VT"]],
+      ].flatMap(([city, segments]) => segments.map((segment) => {{
+        const latest = latestRecord(city, segment);
+        return {{
+          market: city,
+          segment,
+          latest_quarter: latest?.quarter ?? "",
+          flow_metric: metricLabels[state.flowMetric],
+          value: latest?.[state.flowMetric] ?? null,
+        }};
+      }}));
+    }}
+
+    function deepMetricRows(metricKey) {{
+      return filteredRecordsFor(state.deepCity, state.deepSegment).map((row) => {{
+        return {{
+          quarter: row.quarter,
+          market: state.deepCity,
+          segment: state.deepSegment,
+          metric: metricLabels[metricKey],
+          value: row?.[metricKey] ?? null,
+        }};
+      }});
+    }}
+
+    function deepDimensionRows(dimensionType) {{
+      const metricKey = state.flowMetric;
+      const rows = filteredDimensionRecordsFor(state.deepCity, state.deepSegment, dimensionType);
+      if (dimensionType === "developer") {{
+        const labels = dimensionQuarterLabels(state.deepCity, state.deepSegment, dimensionType);
+        const latestQuarter = labels[labels.length - 1];
+        const latestRows = rows.filter((row) => row.quarter === latestQuarter);
+        const totals = new Map();
+        latestRows.forEach((row) => {{
+          totals.set(row.dimension_value, (totals.get(row.dimension_value) || 0) + Number(row[metricKey] ?? 0));
+        }});
+        const ordered = [...totals.entries()].sort((a, b) => b[1] - a[1]);
+        const topFive = ordered.slice(0, 5).map(([dimension_value, value]) => ({{
+          quarter: latestQuarter,
+          market: state.deepCity,
+          segment: state.deepSegment,
+          dimension_type: "developer",
+          dimension_value,
+          flow_metric: metricLabels[metricKey],
+          value,
+          grouping: "Top 5",
+        }}));
+        const otherValue = ordered.slice(5).reduce((sum, [, value]) => sum + value, 0);
+        if (otherValue > 0) {{
+          topFive.push({{
+            quarter: latestQuarter,
+            market: state.deepCity,
+            segment: state.deepSegment,
+            dimension_type: "developer",
+            dimension_value: "Other",
+            flow_metric: metricLabels[metricKey],
+            value: otherValue,
+            grouping: "Other",
+          }});
+        }}
+        return topFive;
+      }}
+      return rows.map((row) => {{
+        return {{
+          quarter: row.quarter,
+          market: row.city,
+          segment: row.segment,
+          dimension_type: row.dimension_type,
+          dimension_value: row.dimension_value,
+          flow_metric: metricLabels[metricKey],
+          value: row[metricKey] ?? null,
+        }};
+      }});
+    }}
+
+    function deepTableRows() {{
+      return [...recordsFor(state.deepCity, state.deepSegment)]
+        .filter((row) => isQuarterInRange(row.quarter))
+        .map((row) => {{
+          return {{
+            quarter: row.quarter,
+            market: state.deepCity,
+            segment: state.deepSegment,
+            new_launched: row.new_launched,
+            new_sold: row.new_sold,
+            price_current: row.weighted_price_current_supply,
+            price_available: row.weighted_price_available_supply,
+            new_project_avg_price: row.new_project_avg_price,
+            quarterly_sold_rate: row.sold_rate_quarterly,
+            cumulative_sold_rate: row.sold_rate_cumulative,
+            active_projects: row.active_projects,
+            new_projects: row.new_projects,
+          }};
+        }});
+    }}
+
+    function quarterlyCompareRows() {{
+      const labels = unionQuarterLabels([["Hanoi", "Total"], ["HCMC", "Total"]]).reverse();
+      const hanoi = new Map(filteredRecordsFor("Hanoi", "Total").map((row) => [row.quarter, row]));
+      const hcmc = new Map(filteredRecordsFor("HCMC", "Total").map((row) => [row.quarter, row]));
+      return labels.map((quarter) => {{
+        const hn = hanoi.get(quarter);
+        const hc = hcmc.get(quarter);
+        return {{
+          quarter,
+          hanoi_launched: hn?.new_launched ?? null,
+          hcmc_launched: hc?.new_launched ?? null,
+          hanoi_sold: hn?.new_sold ?? null,
+          hcmc_sold: hc?.new_sold ?? null,
+          hanoi_quarterly_sold_rate: hn?.sold_rate_quarterly ?? null,
+          hcmc_quarterly_sold_rate: hc?.sold_rate_quarterly ?? null,
+          hanoi_cumulative_sold_rate: hn?.sold_rate_cumulative ?? null,
+          hcmc_cumulative_sold_rate: hc?.sold_rate_cumulative ?? null,
+          hanoi_active_projects: hn?.active_projects ?? null,
+          hcmc_active_projects: hc?.active_projects ?? null,
+          hanoi_price_current: hn?.weighted_price_current_supply ?? null,
+          hcmc_price_current: hc?.weighted_price_current_supply ?? null,
+        }};
+      }});
+    }}
+
+    function mapSegmentRows(metricKey) {{
+      const latestQuarter = latestMapQuarter();
+      return latestMapPoints().map((point) => point.segment)
+        .filter((segment, index, all) => segment && all.indexOf(segment) === index)
+        .flatMap((segment) => ["Hanoi", "HCMC"].map((city) => {{
+          const points = latestMapPoints().filter((point) => point.city === city && point.segment === segment);
+          return {{
+            quarter: latestQuarter,
+            market: city,
+            segment,
+            metric: metricLabels[metricKey],
+            value: points.reduce((sum, point) => sum + Number(point[metricKey] ?? 0), 0),
+          }};
+        }}));
+    }}
+
+    function mappedProjectRows(points) {{
+      return points.map((point) => {{
+        const quarterlySoldRate = quarterlySoldRateForPoint(point);
+        const accumulatedSoldRate = accumulatedSoldRateForPoint(point);
+        return {{
+          project_name: point.project_name,
+          developer: point.developer || "",
+          market: point.city,
+          segment: point.segment,
+          quarter: point.quarter,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          new_launched: point.new_launched,
+          new_sold: point.new_sold,
+          current_supply: point.current_supply,
+          available_begin: point.available_begin,
+          quarterly_sold_rate: quarterlySoldRate,
+          accumulated_sold_rate: accumulatedSoldRate,
+          price: point.price,
+        }};
+      }});
+    }}
+
+    function exportPayloadFor(key) {{
+      const payloads = {{
+        "flow-compare": () => ({{
+          filename: `flow-compare-${{sanitizeFilename(metricLabels[state.flowMetric])}}-${{timeframeSlug()}}.csv`,
+          rows: compareMetricRows(state.flowMetric),
+        }}),
+        "latest-snapshot": () => ({{
+          filename: `latest-quarter-snapshot-${{sanitizeFilename(metricLabels[state.flowMetric])}}.csv`,
+          rows: latestSnapshotRows(),
+        }}),
+        "hanoi-breakdown": () => ({{
+          filename: `hanoi-breakdown-${{sanitizeFilename(metricLabels[state.flowMetric])}}-${{timeframeSlug()}}.csv`,
+          rows: breakdownRows("Hanoi", ["Central Hanoi", "Van Giang HY"]),
+        }}),
+        "hcmc-breakdown": () => ({{
+          filename: `hcmc-breakdown-${{sanitizeFilename(metricLabels[state.flowMetric])}}-${{timeframeSlug()}}.csv`,
+          rows: breakdownRows("HCMC", ["Central HCMC", "Binh Duong", "BR-VT"]),
+        }}),
+        "segment-mix-table": () => ({{
+          filename: `segment-mix-${{sanitizeFilename(metricLabels[state.flowMetric])}}.csv`,
+          rows: segmentMixRows(),
+        }}),
+        "price-current-compare": () => ({{
+          filename: `weighted-price-current-supply-${{timeframeSlug()}}.csv`,
+          rows: compareMetricRows("weighted_price_current_supply"),
+        }}),
+        "price-available-compare": () => ({{
+          filename: `weighted-price-available-supply-${{timeframeSlug()}}.csv`,
+          rows: compareMetricRows("weighted_price_available_supply"),
+        }}),
+        "new-project-compare": () => ({{
+          filename: `average-price-new-projects-${{timeframeSlug()}}.csv`,
+          rows: compareMetricRows("new_project_avg_price"),
+        }}),
+        "sold-rate-quarterly-compare": () => ({{
+          filename: `quarterly-sold-rate-${{timeframeSlug()}}.csv`,
+          rows: compareMetricRows("sold_rate_quarterly"),
+        }}),
+        "sold-rate-cumulative-compare": () => ({{
+          filename: `cumulative-sold-rate-${{timeframeSlug()}}.csv`,
+          rows: compareMetricRows("sold_rate_cumulative"),
+        }}),
+        "deep-current-price": () => ({{
+          filename: `deep-current-price-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
+          rows: deepMetricRows("weighted_price_current_supply"),
+        }}),
+        "deep-available-price": () => ({{
+          filename: `deep-available-price-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
+          rows: deepMetricRows("weighted_price_available_supply"),
+        }}),
+        "deep-new-project-price": () => ({{
+          filename: `deep-new-project-price-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
+          rows: deepMetricRows("new_project_avg_price"),
+        }}),
+        "deep-new-projects": () => ({{
+          filename: `deep-new-projects-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
+          rows: deepMetricRows("new_projects"),
+        }}),
+        "deep-sold-rate-quarterly": () => ({{
+          filename: `deep-quarterly-sold-rate-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
+          rows: deepMetricRows("sold_rate_quarterly"),
+        }}),
+        "deep-sold-rate-cumulative": () => ({{
+          filename: `deep-cumulative-sold-rate-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
+          rows: deepMetricRows("sold_rate_cumulative"),
+        }}),
+        "deep-grading-mix": () => ({{
+          filename: `deep-grading-mix-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{sanitizeFilename(metricLabels[state.flowMetric])}}-${{timeframeSlug()}}.csv`,
+          rows: deepDimensionRows("grading"),
+        }}),
+        "deep-region-mix": () => ({{
+          filename: `deep-region-mix-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{sanitizeFilename(metricLabels[state.flowMetric])}}-${{timeframeSlug()}}.csv`,
+          rows: deepDimensionRows("region"),
+        }}),
+        "deep-developer-mix": () => ({{
+          filename: `deep-developer-mix-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{sanitizeFilename(metricLabels[state.flowMetric])}}.csv`,
+          rows: deepDimensionRows("developer"),
+        }}),
+        "deep-quarterly-table": () => ({{
+          filename: `deep-quarterly-table-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
+          rows: deepTableRows(),
+        }}),
+        "map-launch-segment": () => ({{
+          filename: `map-new-launched-by-segment-${{latestMapQuarter()}}.csv`,
+          rows: mapSegmentRows("new_launched"),
+        }}),
+        "map-sold-segment": () => ({{
+          filename: `map-new-sold-by-segment-${{latestMapQuarter()}}.csv`,
+          rows: mapSegmentRows("new_sold"),
+        }}),
+        "project-map": () => ({{
+          filename: `project-map-points-${{sanitizeFilename(state.mapCityFilter)}}-${{latestMapQuarter()}}.csv`,
+          rows: mappedProjectRows(filteredProjectPoints(latestMapPoints())),
+        }}),
+        "active-project-list": () => ({{
+          filename: `active-project-list-${{sanitizeFilename(state.mapCityFilter)}}-${{latestMapQuarter()}}.csv`,
+          rows: mappedProjectRows(filteredProjectPoints(latestMapPoints())),
+        }}),
+        "quarterly-compare-table": () => ({{
+          filename: `quarterly-compare-table-${{timeframeSlug()}}.csv`,
+          rows: quarterlyCompareRows(),
+        }}),
+      }};
+      return payloads[key] ? payloads[key]() : null;
+    }}
+
+    function initializeExportButtons() {{
+      document.querySelectorAll("[data-export-key]").forEach((panel) => {{
+        if (panel.querySelector(".export-button")) {{
+          return;
+        }}
+        const key = panel.dataset.exportKey;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "export-button";
+        button.textContent = "Download CSV";
+        button.addEventListener("click", () => {{
+          const payload = exportPayloadFor(key);
+          if (!payload) {{
+            return;
+          }}
+          downloadRowsAsCsv(payload.filename, payload.rows);
+        }});
+        panel.appendChild(button);
+      }});
     }}
 
     function renderToggleRow(hostId, options, activeValue, onClick) {{
@@ -2546,6 +2946,7 @@ def build_html(dataset: dict[str, Any]) -> str:
     }}
 
     function renderDashboard() {{
+      initializeExportButtons();
       renderFlowMetricButtons();
       renderDeepCityButtons();
       renderDeepSegmentButtons();
