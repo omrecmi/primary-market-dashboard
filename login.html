@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Login</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3f5ef;
+      --panel: rgba(255, 255, 255, 0.92);
+      --ink: #213238;
+      --muted: #607279;
+      --line: rgba(33, 50, 56, 0.14);
+      --accent: #0f766e;
+      --accent-2: #164e63;
+      --danger: #c2410c;
+      --shadow: 0 28px 70px rgba(22, 78, 99, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(22, 78, 99, 0.16), transparent 24%),
+        linear-gradient(135deg, #f7faf7 0%, var(--bg) 55%, #eef4f6 100%);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: min(460px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 40px);
+      line-height: 1;
+    }
+
+    p {
+      margin: 14px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    form {
+      margin-top: 28px;
+      display: grid;
+      gap: 14px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 15px 16px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--ink);
+    }
+
+    input:focus {
+      border-color: rgba(15, 118, 110, 0.55);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+    }
+
+    button {
+      margin-top: 6px;
+      border: 0;
+      border-radius: 16px;
+      padding: 15px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+      box-shadow: 0 14px 28px rgba(15, 118, 110, 0.22);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: wait;
+      transform: none;
+    }
+
+    .hint,
+    .error {
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    .hint {
+      color: var(--muted);
+    }
+
+    .error {
+      color: var(--danger);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="eyebrow">Private Access</p>
+    <h1>Primary Market Dashboard</h1>
+    <p>Enter the shared password to open the secured dashboard.</p>
+
+    <form id="loginForm">
+      <div>
+        <label for="password">Shared Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button id="submitButton" type="submit">Enter Dashboard</button>
+      <div class="error" id="errorMessage" aria-live="polite"></div>
+      <div class="hint">Need to sign out later? Open <code>/api/logout</code>.</div>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const passwordInput = document.getElementById("password");
+    const submitButton = document.getElementById("submitButton");
+    const errorMessage = document.getElementById("errorMessage");
+    const next = new URLSearchParams(window.location.search).get("next") || "/";
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorMessage.textContent = "";
+      submitButton.disabled = true;
+      submitButton.textContent = "Checking...";
+
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            password: passwordInput.value,
+            next
+          })
+        });
+
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error || "Login failed");
+        }
+
+        window.location.assign(payload.next || "/");
+      } catch (error) {
+        errorMessage.textContent = error.message || "Login failed";
+        submitButton.disabled = false;
+        submitButton.textContent = "Enter Dashboard";
+      }
+    });
+  </script>
+</body>
+</html>
