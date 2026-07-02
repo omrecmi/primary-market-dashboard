@@ -11,7 +11,7 @@ from typing import Any
 import pandas as pd
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 SHORTCUT_PATH = ROOT / "01. Database_all - Shortcut.lnk"
 OUTPUT_DIR = Path(__file__).resolve().parent / "output"
 OUTPUT_HTML = OUTPUT_DIR / "primary_market_dashboard.html"
@@ -569,6 +569,7 @@ def build_dataset() -> dict[str, Any]:
                 "quarter_sort",
                 "project_id",
                 "project_name",
+                "developer",
                 "project_latitude",
                 "project_longitude",
                 "price",
@@ -1785,6 +1786,7 @@ def build_html(dataset: dict[str, Any]) -> str:
     function renderProjectTableHeaders() {{
       const headers = [
         ["project_name", "Project"],
+        ["developer", "Developer"],
         ["city", "Market"],
         ["segment", "Segment"],
         ["quarter", "Quarter"],
@@ -1809,7 +1811,7 @@ def build_html(dataset: dict[str, Any]) -> str:
             state.projectSortDirection = state.projectSortDirection === "asc" ? "desc" : "asc";
           }} else {{
             state.projectSortKey = key;
-            state.projectSortDirection = ["project_name", "city", "segment", "quarter"].includes(key) ? "asc" : "desc";
+            state.projectSortDirection = ["project_name", "developer", "city", "segment", "quarter"].includes(key) ? "asc" : "desc";
           }}
           renderProjectTableHeaders();
           renderMap();
@@ -2376,6 +2378,7 @@ def build_html(dataset: dict[str, Any]) -> str:
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><strong>${{point.project_name}}</strong></td>
+          <td>${{point.developer || "-"}}</td>
           <td>${{point.city}}</td>
           <td>${{point.segment}}</td>
           <td>${{point.quarter}}</td>
@@ -2457,6 +2460,7 @@ def build_html(dataset: dict[str, Any]) -> str:
         const accumulatedSoldRate = accumulatedSoldRateForPoint(point);
         marker.bindPopup(`
           <strong>${{point.project_name}}</strong><br />
+          Developer: ${{point.developer || "-"}}<br />
           Quarter: ${{point.quarter}}<br />
           New launched: ${{formatNumber(point.new_launched)}}<br />
           New sold: ${{formatNumber(point.new_sold, "decimal")}}<br />

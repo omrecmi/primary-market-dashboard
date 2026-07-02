@@ -6,3 +6,20 @@ This repository contains:
 - `primary_market_dashboard.html`: generated dashboard output
 - `primary_market_dashboard_data.json`: exported data payload
 - `build_primary_market_dashboard.py`: source code used to build the dashboard
+
+## Vercel Protected Deploy
+
+This folder can also be deployed to Vercel with a shared-password login wall.
+
+Required environment variables:
+
+- `SITE_PASSWORD`: shared password for viewers
+- `SESSION_SECRET`: long random string used to sign the login session cookie
+
+Login route:
+
+- `/login`
+
+Logout route:
+
+- `/api/logout`
