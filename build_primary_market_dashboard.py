@@ -58,6 +58,19 @@ WORKBOOK_CONFIGS = (
             "van giang": "Van Giang HY",
         },
         "default_segment": "Central Hanoi",
+        "forecast_sheet": "8. Forecast Q2.2026",
+        "forecast_sheet_header_row": 3,
+        "forecast_project_id_col": "Project_id",
+        "forecast_project_name_col": "Project_name",
+        "forecast_developer_col": "CĐT",
+        "forecast_segment_col": "District",
+        "forecast_region_col": "Region",
+        "forecast_quarter_col": "Quarter",
+        "forecast_grading_col": "Grading",
+        "forecast_status_col": "Status Q2/2026",
+        "forecast_future_2026_col": "2026\nBase new",
+        "forecast_lat_col": "Lat",
+        "forecast_long_col": "Long",
     },
     {
         "city": "HCMC",
@@ -88,6 +101,8 @@ WORKBOOK_CONFIGS = (
             "br-vt": "BR-VT",
         },
         "default_segment": "Other",
+        "future_2026_col": "2026F",
+        "future_2027_col": "2027F",
     },
 )
 
@@ -219,6 +234,8 @@ def load_city_rows(base_dir: Path, config: dict[str, Any]) -> pd.DataFrame:
             config["available_end_col"],
             config["current_sold_out_col"],
             config["status_col"],
+            *([config["future_2026_col"]] if config.get("future_2026_col") else []),
+            *([config["future_2027_col"]] if config.get("future_2027_col") else []),
             *([config["new_project_col"]] if config["new_project_col"] else []),
         ]
     ].copy()
@@ -254,6 +271,13 @@ def load_city_rows(base_dir: Path, config: dict[str, Any]) -> pd.DataFrame:
         (config["current_sold_out_col"], "current_sold_out"),
     ):
         dataframe[target_col] = pd.to_numeric(dataframe[source_col], errors="coerce")
+
+    dataframe["future_launch_2026"] = pd.to_numeric(
+        dataframe[config["future_2026_col"]], errors="coerce"
+    ) if config.get("future_2026_col") else 0
+    dataframe["future_launch_2027"] = pd.to_numeric(
+        dataframe[config["future_2027_col"]], errors="coerce"
+    ) if config.get("future_2027_col") else 0
 
     if config["new_project_col"]:
         dataframe["new_project_marker"] = dataframe[config["new_project_col"]]
@@ -306,6 +330,82 @@ def attach_first_launch_flags(dataframe: pd.DataFrame) -> pd.DataFrame:
     dataframe = dataframe.merge(first_launch[["project_key", "first_launch_quarter"]], on="project_key", how="left")
     dataframe["is_new_project"] = dataframe["quarter"] == dataframe["first_launch_quarter"]
     return dataframe
+
+
+def load_hanoi_future_rows(base_dir: Path, config: dict[str, Any]) -> pd.DataFrame:
+    workbook_path = base_dir / config["folder"] / config["file"]
+    dataframe = pd.read_excel(
+        workbook_path,
+        sheet_name=config["forecast_sheet"],
+        header=config["forecast_sheet_header_row"] - 1,
+    )
+    dataframe.columns = [str(column).strip() for column in dataframe.columns]
+    dataframe = dataframe[
+        [
+            config["forecast_project_id_col"],
+            config["forecast_project_name_col"],
+            config["forecast_developer_col"],
+            config["forecast_segment_col"],
+            config["forecast_region_col"],
+            config["forecast_quarter_col"],
+            config["forecast_grading_col"],
+            config["forecast_status_col"],
+            config["forecast_future_2026_col"],
+            config["forecast_lat_col"],
+            config["forecast_long_col"],
+        ]
+    ].copy()
+    dataframe["city"] = config["city"]
+    dataframe["project_id"] = dataframe[config["forecast_project_id_col"]].map(normalize_project_id)
+    dataframe["project_name"] = dataframe[config["forecast_project_name_col"]].astype(str).str.strip()
+    dataframe["developer"] = dataframe[config["forecast_developer_col"]].map(
+        lambda value: normalize_dimension(value, "developer")
+    )
+    dataframe["segment"] = dataframe[config["forecast_segment_col"]].map(
+        lambda value: normalize_segment(value, config)
+    )
+    dataframe["region"] = dataframe[config["forecast_region_col"]].map(
+        lambda value: normalize_dimension(value, "region")
+    )
+    dataframe["quarter"] = dataframe[config["forecast_quarter_col"]].astype(str).str.strip()
+    dataframe["quarter_sort"] = dataframe["quarter"].map(quarter_key)
+    dataframe["grading"] = dataframe[config["forecast_grading_col"]].map(
+        lambda value: normalize_dimension(value, "grading")
+    )
+    dataframe["sale_status"] = dataframe[config["forecast_status_col"]].astype(str).str.strip()
+    dataframe["future_launch_2026"] = pd.to_numeric(
+        dataframe[config["forecast_future_2026_col"]], errors="coerce"
+    ).fillna(0)
+    dataframe["future_launch_2027"] = 0
+    dataframe["future_launch_total"] = dataframe["future_launch_2026"]
+    dataframe["latitude"] = pd.to_numeric(dataframe[config["forecast_lat_col"]], errors="coerce")
+    dataframe["longitude"] = pd.to_numeric(dataframe[config["forecast_long_col"]], errors="coerce")
+    dataframe = dataframe[
+        dataframe["project_id"].notna()
+        & dataframe["latitude"].notna()
+        & dataframe["longitude"].notna()
+        & (dataframe["future_launch_total"] > 0)
+        & (dataframe["quarter_sort"] > 0)
+    ].copy()
+    return dataframe[
+        [
+            "city",
+            "segment",
+            "region",
+            "grading",
+            "quarter",
+            "quarter_sort",
+            "project_id",
+            "project_name",
+            "developer",
+            "latitude",
+            "longitude",
+            "sale_status",
+            "future_launch_2026",
+            "future_launch_2027",
+            "future_launch_total",
+        ]
+    ]
 
 
 def load_city_boundaries() -> dict[str, Any]:
@@ -523,6 +623,7 @@ def build_dataset() -> dict[str, Any]:
     dimension_breakdowns: list[dict[str, Any]] = []
     segment_map: dict[str, list[str]] = {}
     map_points: list[dict[str, Any]] = []
+    future_map_points: list[dict[str, Any]] = []
     for city_frame in city_frames:
         city_name = city_frame["city"].iloc[0]
         segments = sorted(city_frame["segment"].dropna().unique().tolist())
@@ -593,6 +694,53 @@ def build_dataset() -> dict[str, Any]:
             json.loads(point_rows.to_json(orient="records", force_ascii=False))
         )
 
+        if city_name == "HCMC":
+            future_rows = city_frame[
+                city_frame["is_actual_project"]
+                & city_frame["project_latitude"].notna()
+                & city_frame["project_longitude"].notna()
+                & (
+                    city_frame["future_launch_2026"].fillna(0).gt(0)
+                    | city_frame["future_launch_2027"].fillna(0).gt(0)
+                )
+            ][
+                [
+                    "city",
+                    "segment",
+                    "region",
+                    "grading",
+                    "quarter",
+                    "quarter_sort",
+                    "project_id",
+                    "project_name",
+                    "developer",
+                    "project_latitude",
+                    "project_longitude",
+                    "sale_status",
+                    "future_launch_2026",
+                    "future_launch_2027",
+                ]
+            ].copy()
+            future_rows["future_launch_total"] = (
+                future_rows["future_launch_2026"].fillna(0)
+                + future_rows["future_launch_2027"].fillna(0)
+            )
+            future_rows = future_rows.rename(
+                columns={
+                    "project_latitude": "latitude",
+                    "project_longitude": "longitude",
+                }
+            )
+            future_map_points.extend(
+                json.loads(future_rows.to_json(orient="records", force_ascii=False))
+            )
+
+    hanoi_config = next(config for config in WORKBOOK_CONFIGS if config["city"] == "Hanoi")
+    hanoi_future_rows = load_hanoi_future_rows(base_dir, hanoi_config)
+    future_map_points.extend(
+        json.loads(hanoi_future_rows.to_json(orient="records", force_ascii=False))
+    )
+
     quarter_list = sorted(
         {record["quarter"] for record in dataset},
         key=quarter_key,
@@ -602,6 +750,7 @@ def build_dataset() -> dict[str, Any]:
         "records": dataset,
         "dimension_breakdowns": dimension_breakdowns,
         "map_points": map_points,
+        "future_map_points": future_map_points,
         "city_boundaries": load_city_boundaries(),
         "segments": segment_map,
         "markets": [config["city"] for config in WORKBOOK_CONFIGS],
@@ -1002,7 +1151,8 @@ def build_html(dataset: dict[str, Any]) -> str:
       line-height: 1.55;
       color: var(--muted);
     }}
-    #projectMap {{
+    #projectMap,
+    #futureProjectMap {{
       width: 100%;
       height: 460px;
       border-radius: 18px;
@@ -1449,6 +1599,48 @@ def build_html(dataset: dict[str, Any]) -> str:
       </div>
     </section>
 
+    <section class="section-block">
+      <div class="section-head">
+        <div>
+          <h2>Map of Future Projects</h2>
+          <div class="section-note">Future launches follow the selected report quarter. HCMC uses the quarterly Time Series forecast columns `2026F` and `2027F`. Hanoi uses the `Forecast Q2.2026` visual sheet and `2026 Base New`.</div>
+        </div>
+      </div>
+      <div class="map-shell">
+        <article class="panel chart-card" data-export-key="future-project-map">
+          <div class="chart-head">
+            <h3 class="chart-title">Future Project Map</h3>
+            <span class="chart-note" id="futureMapNote"></span>
+          </div>
+          <div id="futureProjectMap"></div>
+        </article>
+        <article class="panel chart-card" data-export-key="future-project-list">
+          <div class="chart-head">
+            <h3 class="chart-title">Future Project List</h3>
+            <span class="chart-note">Projects with planned future launches in the selected report quarter</span>
+          </div>
+          <div class="project-filter-row" id="futureProjectCityFilterButtons"></div>
+          <div class="project-table-wrap">
+            <table class="project-table">
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Developer</th>
+                  <th>Market</th>
+                  <th>Segment</th>
+                  <th>Quarter</th>
+                  <th>2026 Launch</th>
+                  <th>2027 Launch</th>
+                  <th>Future Total</th>
+                </tr>
+              </thead>
+              <tbody id="futureProjectListBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+
     <section class="panel table-card" data-export-key="quarterly-compare-table">
       <div class="chart-head">
         <h3 class="chart-title">Quarterly Compare Table</h3>
@@ -1490,6 +1682,7 @@ def build_html(dataset: dict[str, Any]) -> str:
       deepCity: "Hanoi",
       deepSegment: "Total",
       mapCityFilter: "All",
+      futureMapCityFilter: "All",
       startQuarter: dashboardData.quarters.find((quarter) => quarterSort(quarter) >= quarterSort("2022Q1")) || dashboardData.quarters[0],
       endQuarter: dashboardData.quarters[dashboardData.quarters.length - 1],
       projectSortKey: "current_supply",
@@ -1500,6 +1693,9 @@ def build_html(dataset: dict[str, Any]) -> str:
     let projectMap = null;
     let projectMarkers = [];
     let cityBoundaryLayers = [];
+    let futureProjectMap = null;
+    let futureProjectMarkers = [];
+    let futureCityBoundaryLayers = [];
     const cityColors = {{
       Hanoi: "#1B4D5C",
       HCMC: "#3281F5",
@@ -2043,6 +2239,25 @@ def build_html(dataset: dict[str, Any]) -> str:
       }});
     }}
 
+    function futureMappedProjectRows(points) {{
+      return points.map((point) => {{
+        return {{
+          project_name: point.project_name,
+          developer: point.developer || "",
+          grading: point.grading || "",
+          market: point.city,
+          segment: point.segment,
+          quarter: point.quarter,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          future_launch_2026: point.future_launch_2026 ?? null,
+          future_launch_2027: point.future_launch_2027 ?? null,
+          future_launch_total: point.future_launch_total ?? null,
+          sale_status: point.sale_status || "",
+        }};
+      }});
+    }}
+
     function exportPayloadFor(key) {{
       const payloads = {{
         "flow-compare": () => ({{
@@ -2141,6 +2356,14 @@ def build_html(dataset: dict[str, Any]) -> str:
           filename: `active-project-list-${{sanitizeFilename(state.mapCityFilter)}}-${{latestMapQuarter()}}.csv`,
           rows: mappedProjectRows(filteredProjectPoints(latestMapPoints())),
         }}),
+        "future-project-map": () => ({{
+          filename: `future-project-map-${{sanitizeFilename(state.futureMapCityFilter)}}-${{state.endQuarter}}.csv`,
+          rows: futureMappedProjectRows(filteredFutureProjectPoints(futureMapPointsForQuarter(state.endQuarter))),
+        }}),
+        "future-project-list": () => ({{
+          filename: `future-project-list-${{sanitizeFilename(state.futureMapCityFilter)}}-${{state.endQuarter}}.csv`,
+          rows: futureMappedProjectRows(filteredFutureProjectPoints(futureMapPointsForQuarter(state.endQuarter))),
+        }}),
         "quarterly-compare-table": () => ({{
           filename: `quarterly-compare-table-${{timeframeSlug()}}.csv`,
           rows: quarterlyCompareRows(),
@@ -2199,6 +2422,23 @@ def build_html(dataset: dict[str, Any]) -> str:
       );
     }}
 
+    function renderFutureProjectCityFilterButtons() {{
+      renderToggleRow(
+        "futureProjectCityFilterButtons",
+        [
+          ["All", "All"],
+          ["Hanoi", "Hanoi"],
+          ["HCMC", "HCMC"],
+        ],
+        state.futureMapCityFilter,
+        (value) => {{
+          state.futureMapCityFilter = value;
+          renderFutureProjectCityFilterButtons();
+          renderFutureMap();
+        }}
+      );
+    }}
+
     function renderProjectTableHeaders() {{
       const headers = [
         ["project_name", "Project"],
@@ -2241,6 +2481,19 @@ def build_html(dataset: dict[str, Any]) -> str:
         return points;
       }}
       return points.filter((point) => point.city === state.mapCityFilter);
+    }}
+
+    function futureMapPointsForQuarter(quarter) {{
+      return dashboardData.future_map_points
+        .filter((row) => row.quarter === quarter)
+        .sort((a, b) => Number(b.future_launch_total ?? 0) - Number(a.future_launch_total ?? 0));
+    }}
+
+    function filteredFutureProjectPoints(points) {{
+      if (state.futureMapCityFilter === "All") {{
+        return points;
+      }}
+      return points.filter((point) => point.city === state.futureMapCityFilter);
     }}
 
     function renderSummary() {{
@@ -2840,6 +3093,34 @@ def build_html(dataset: dict[str, Any]) -> str:
       }});
     }}
 
+    function renderFutureProjectTable(points) {{
+      const body = document.getElementById("futureProjectListBody");
+      body.innerHTML = "";
+      if (!points.length) {{
+        const tr = document.createElement("tr");
+        tr.innerHTML = '<td colspan="8">No future launch projects for the selected report quarter.</td>';
+        body.appendChild(tr);
+        return;
+      }}
+
+      [...points]
+        .sort((a, b) => Number(b.future_launch_total ?? 0) - Number(a.future_launch_total ?? 0))
+        .forEach((point) => {{
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><strong>${{point.project_name}}</strong></td>
+            <td>${{point.developer || "-"}}</td>
+            <td>${{point.city}}</td>
+            <td>${{point.segment}}</td>
+            <td>${{point.quarter}}</td>
+            <td>${{formatNumber(point.future_launch_2026, "decimal")}}</td>
+            <td>${{formatNumber(point.future_launch_2027, "decimal")}}</td>
+            <td>${{formatNumber(point.future_launch_total, "decimal")}}</td>
+          `;
+          body.appendChild(tr);
+        }});
+    }}
+
     function renderCityBoundaries() {{
       cityBoundaryLayers.forEach((layer) => projectMap.removeLayer(layer));
       cityBoundaryLayers = [];
@@ -2865,6 +3146,31 @@ def build_html(dataset: dict[str, Any]) -> str:
       }});
     }}
 
+    function renderFutureCityBoundaries() {{
+      futureCityBoundaryLayers.forEach((layer) => futureProjectMap.removeLayer(layer));
+      futureCityBoundaryLayers = [];
+
+      ["Hanoi", "HCMC"].forEach((city) => {{
+        const geometry = dashboardData.city_boundaries?.[city];
+        if (!geometry) {{
+          return;
+        }}
+        const layer = L.geoJSON(geometry, {{
+          style: {{
+            color: cityColors[city],
+            weight: 2.5,
+            opacity: 0.95,
+            fillColor: cityColors[city],
+            fillOpacity: 0.04,
+            dashArray: "8 6",
+          }},
+        }})
+          .bindTooltip(`${{city}} market boundary`, {{ sticky: true }})
+          .addTo(futureProjectMap);
+        futureCityBoundaryLayers.push(layer);
+      }});
+    }}
+
     function gradingColorForPoint(point) {{
       return gradingColors[point.grading] || "#A0A7B4";
     }}
@@ -2876,6 +3182,16 @@ def build_html(dataset: dict[str, Any]) -> str:
           maxZoom: 18,
           attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
         }}).addTo(projectMap);
+      }}
+    }}
+
+    function ensureFutureMap() {{
+      if (!futureProjectMap) {{
+        futureProjectMap = L.map("futureProjectMap", {{ zoomControl: true }}).setView([16.1, 106.2], 6);
+        L.tileLayer("https://{{s}}.basemaps.cartocdn.com/light_nolabels/{{z}}/{{x}}/{{y}}{{r}}.png", {{
+          maxZoom: 18,
+          attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+        }}).addTo(futureProjectMap);
       }}
     }}
 
@@ -2933,6 +3249,57 @@ def build_html(dataset: dict[str, Any]) -> str:
         projectMap.setView(bounds[0], 12);
       }} else if (bounds.length > 1) {{
         projectMap.fitBounds(bounds, {{ padding: [24, 24] }});
+      }}
+    }}
+
+    function renderFutureMap() {{
+      ensureFutureMap();
+      futureProjectMarkers.forEach((marker) => futureProjectMap.removeLayer(marker));
+      futureProjectMarkers = [];
+      const selectedQuarter = state.endQuarter;
+      document.getElementById("futureMapNote").textContent = `${{state.futureMapCityFilter === "All" ? "All markets" : state.futureMapCityFilter}} / selected quarter / ${{selectedQuarter}}`;
+
+      const allPoints = futureMapPointsForQuarter(selectedQuarter);
+      renderFutureCityBoundaries();
+      const points = filteredFutureProjectPoints(allPoints);
+      renderFutureProjectTable(points);
+
+      if (!points.length) {{
+        futureProjectMap.setView([16.1, 106.2], 6);
+        return;
+      }}
+
+      const bounds = [];
+      points.forEach((point) => {{
+        const lat = Number(point.latitude);
+        const lng = Number(point.longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {{
+          return;
+        }}
+        bounds.push([lat, lng]);
+        const marker = L.circleMarker([lat, lng], {{
+          radius: 8,
+          color: "#ffffff",
+          weight: 2,
+          fillColor: gradingColorForPoint(point),
+          fillOpacity: 0.92,
+        }}).addTo(futureProjectMap);
+        marker.bindPopup(`
+          <strong>${{point.project_name}}</strong><br />
+          Developer: ${{point.developer || "-"}}<br />
+          Grading: ${{point.grading || "-"}}<br />
+          Quarter: ${{point.quarter}}<br />
+          2026 Launch: ${{formatNumber(point.future_launch_2026, "decimal")}}<br />
+          2027 Launch: ${{formatNumber(point.future_launch_2027, "decimal")}}<br />
+          Future Total: ${{formatNumber(point.future_launch_total, "decimal")}}
+        `);
+        futureProjectMarkers.push(marker);
+      }});
+
+      if (bounds.length === 1) {{
+        futureProjectMap.setView(bounds[0], 12);
+      }} else if (bounds.length > 1) {{
+        futureProjectMap.fitBounds(bounds, {{ padding: [24, 24] }});
       }}
     }}
 
@@ -3008,6 +3375,7 @@ def build_html(dataset: dict[str, Any]) -> str:
       renderDeepCityButtons();
       renderDeepSegmentButtons();
       renderProjectCityFilterButtons();
+      renderFutureProjectCityFilterButtons();
       renderProjectTableHeaders();
       renderTimeframeControls();
       bindRefreshButton();
@@ -3015,6 +3383,7 @@ def build_html(dataset: dict[str, Any]) -> str:
       renderPriceCompare();
       renderDeepDive();
       renderMap();
+      renderFutureMap();
     }}
 
     renderDashboard();
