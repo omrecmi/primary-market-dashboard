@@ -11,7 +11,7 @@ from typing import Any
 import pandas as pd
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parent.parent
 SHORTCUT_PATH = ROOT / "01. Database_all - Shortcut.lnk"
 OUTPUT_DIR = Path(__file__).resolve().parent / "output"
 OUTPUT_HTML = OUTPUT_DIR / "primary_market_dashboard.html"
@@ -52,25 +52,16 @@ WORKBOOK_CONFIGS = (
         "available_begin_col": "Available for sale at the beginning",
         "available_end_col": "Available for sale at the end",
         "current_sold_out_col": "Current sold-out",
+        "future_launch_col": "New Launch \n2026F (base)",
+        "future_sold_col": "New Sold \n2026F (base)",
+        "future_2027_launch_col": None,
+        "future_2027_sold_col": None,
         "status_col": "SaleStatus",
         "new_project_col": "new_project",
         "segment_map": {
             "van giang": "Van Giang HY",
         },
         "default_segment": "Central Hanoi",
-        "forecast_sheet": "8. Forecast Q2.2026",
-        "forecast_sheet_header_row": 3,
-        "forecast_project_id_col": "Project_id",
-        "forecast_project_name_col": "Project_name",
-        "forecast_developer_col": "CĐT",
-        "forecast_segment_col": "District",
-        "forecast_region_col": "Region",
-        "forecast_quarter_col": "Quarter",
-        "forecast_grading_col": "Grading",
-        "forecast_status_col": "Status Q2/2026",
-        "forecast_future_2026_col": "2026\nBase new",
-        "forecast_lat_col": "Lat",
-        "forecast_long_col": "Long",
     },
     {
         "city": "HCMC",
@@ -93,6 +84,10 @@ WORKBOOK_CONFIGS = (
         "available_begin_col": "Available for sale at the beginning",
         "available_end_col": "Available for sale at the end",
         "current_sold_out_col": "Current sold-out",
+        "future_launch_col": "Supply 2026F",
+        "future_sold_col": None,
+        "future_2027_launch_col": "Supply 2027F",
+        "future_2027_sold_col": "Sold 2027F",
         "status_col": "Sale Status",
         "new_project_col": None,
         "segment_map": {
@@ -101,8 +96,6 @@ WORKBOOK_CONFIGS = (
             "br-vt": "BR-VT",
         },
         "default_segment": "Other",
-        "future_2026_col": "2026F",
-        "future_2027_col": "2027F",
     },
 )
 
@@ -234,8 +227,6 @@ def load_city_rows(base_dir: Path, config: dict[str, Any]) -> pd.DataFrame:
             config["available_end_col"],
             config["current_sold_out_col"],
             config["status_col"],
-            *([config["future_2026_col"]] if config.get("future_2026_col") else []),
-            *([config["future_2027_col"]] if config.get("future_2027_col") else []),
             *([config["new_project_col"]] if config["new_project_col"] else []),
         ]
     ].copy()
@@ -272,13 +263,6 @@ def load_city_rows(base_dir: Path, config: dict[str, Any]) -> pd.DataFrame:
     ):
         dataframe[target_col] = pd.to_numeric(dataframe[source_col], errors="coerce")
 
-    dataframe["future_launch_2026"] = pd.to_numeric(
-        dataframe[config["future_2026_col"]], errors="coerce"
-    ) if config.get("future_2026_col") else 0
-    dataframe["future_launch_2027"] = pd.to_numeric(
-        dataframe[config["future_2027_col"]], errors="coerce"
-    ) if config.get("future_2027_col") else 0
-
     if config["new_project_col"]:
         dataframe["new_project_marker"] = dataframe[config["new_project_col"]]
     else:
@@ -313,6 +297,90 @@ def load_city_rows(base_dir: Path, config: dict[str, Any]) -> pd.DataFrame:
     return dataframe
 
 
+def load_future_map_rows(
+    base_dir: Path,
+    config: dict[str, Any],
+    future_label: str,
+    future_launch_col: str,
+    future_sold_col: str | None,
+) -> pd.DataFrame:
+    workbook_path = base_dir / config["folder"] / config["file"]
+    project_lookup = load_project_identification(base_dir, config)
+    dataframe = pd.read_excel(
+        workbook_path,
+        sheet_name=config["sheet"],
+        header=config["header_row"] - 1,
+    )
+    dataframe.columns = [str(column).strip() for column in dataframe.columns]
+
+    selected_columns = [
+        config["project_id_col"],
+        config["project_name_col"],
+        config["quarter_col"],
+        config["segment_col"],
+        config["grading_col"],
+        config["region_col"],
+        config["status_col"],
+        config["price_col"],
+        future_launch_col,
+    ]
+    if future_sold_col:
+        selected_columns.append(future_sold_col)
+    dataframe = dataframe[selected_columns].copy()
+
+    dataframe["city"] = config["city"]
+    dataframe["project_name"] = dataframe[config["project_name_col"]].astype(str).str.strip()
+    dataframe["project_id"] = dataframe[config["project_id_col"]].map(normalize_project_id)
+    dataframe["quarter"] = dataframe[config["quarter_col"]].astype(str).str.strip()
+    dataframe["quarter_sort"] = dataframe["quarter"].map(quarter_key)
+    dataframe = dataframe[dataframe["quarter_sort"] > 0].copy()
+    dataframe["segment"] = dataframe[config["segment_col"]].map(
+        lambda value: normalize_segment(value, config)
+    )
+    dataframe["grading"] = dataframe[config["grading_col"]].map(
+        lambda value: normalize_dimension(value, "grading")
+    )
+    dataframe["region"] = dataframe[config["region_col"]].map(
+        lambda value: normalize_dimension(value, "region")
+    )
+    dataframe["sale_status"] = dataframe[config["status_col"]].astype(str).str.strip()
+    dataframe["future_launch_2026"] = pd.to_numeric(
+        dataframe[future_launch_col], errors="coerce"
+    )
+    if future_sold_col:
+        dataframe["future_sold_2026"] = pd.to_numeric(
+            dataframe[future_sold_col], errors="coerce"
+        )
+    else:
+        dataframe["future_sold_2026"] = pd.NA
+    dataframe["future_label"] = future_label
+    dataframe["price"] = pd.to_numeric(dataframe[config["price_col"]], errors="coerce")
+    dataframe["is_actual_project"] = dataframe["project_id"].notna() & ~dataframe[
+        "project_name"
+    ].str.lower().str.startswith("total")
+    latest_quarter_sort = dataframe["quarter_sort"].max()
+    dataframe = dataframe[
+        dataframe["is_actual_project"]
+        & (dataframe["quarter_sort"] == latest_quarter_sort)
+        & dataframe["future_launch_2026"].notna()
+        & (dataframe["future_launch_2026"] > 0)
+    ].copy()
+    dataframe = dataframe.merge(project_lookup, on="project_id", how="left")
+    override_mask = dataframe["project_id"].notna()
+    if override_mask.any():
+        for (city, project_id), coordinates in PROJECT_COORDINATE_OVERRIDES.items():
+            project_mask = (dataframe["city"] == city) & (dataframe["project_id"] == project_id)
+            if project_mask.any():
+                dataframe.loc[project_mask, "project_latitude"] = coordinates["project_latitude"]
+                dataframe.loc[project_mask, "project_longitude"] = coordinates["project_longitude"]
+    latest_rows = (
+        dataframe.sort_values(["project_id", "quarter_sort"])
+        .drop_duplicates(subset=["project_id"], keep="last")
+        .reset_index(drop=True)
+    )
+    return latest_rows
+
+
 def attach_first_launch_flags(dataframe: pd.DataFrame) -> pd.DataFrame:
     actual = dataframe[
         dataframe["is_actual_project"] & (dataframe["new_launched"] > 0)
@@ -330,82 +398,6 @@ def attach_first_launch_flags(dataframe: pd.DataFrame) -> pd.DataFrame:
     dataframe = dataframe.merge(first_launch[["project_key", "first_launch_quarter"]], on="project_key", how="left")
     dataframe["is_new_project"] = dataframe["quarter"] == dataframe["first_launch_quarter"]
     return dataframe
-
-
-def load_hanoi_future_rows(base_dir: Path, config: dict[str, Any]) -> pd.DataFrame:
-    workbook_path = base_dir / config["folder"] / config["file"]
-    dataframe = pd.read_excel(
-        workbook_path,
-        sheet_name=config["forecast_sheet"],
-        header=config["forecast_sheet_header_row"] - 1,
-    )
-    dataframe.columns = [str(column).strip() for column in dataframe.columns]
-    dataframe = dataframe[
-        [
-            config["forecast_project_id_col"],
-            config["forecast_project_name_col"],
-            config["forecast_developer_col"],
-            config["forecast_segment_col"],
-            config["forecast_region_col"],
-            config["forecast_quarter_col"],
-            config["forecast_grading_col"],
-            config["forecast_status_col"],
-            config["forecast_future_2026_col"],
-            config["forecast_lat_col"],
-            config["forecast_long_col"],
-        ]
-    ].copy()
-    dataframe["city"] = config["city"]
-    dataframe["project_id"] = dataframe[config["forecast_project_id_col"]].map(normalize_project_id)
-    dataframe["project_name"] = dataframe[config["forecast_project_name_col"]].astype(str).str.strip()
-    dataframe["developer"] = dataframe[config["forecast_developer_col"]].map(
-        lambda value: normalize_dimension(value, "developer")
-    )
-    dataframe["segment"] = dataframe[config["forecast_segment_col"]].map(
-        lambda value: normalize_segment(value, config)
-    )
-    dataframe["region"] = dataframe[config["forecast_region_col"]].map(
-        lambda value: normalize_dimension(value, "region")
-    )
-    dataframe["quarter"] = dataframe[config["forecast_quarter_col"]].astype(str).str.strip()
-    dataframe["quarter_sort"] = dataframe["quarter"].map(quarter_key)
-    dataframe["grading"] = dataframe[config["forecast_grading_col"]].map(
-        lambda value: normalize_dimension(value, "grading")
-    )
-    dataframe["sale_status"] = dataframe[config["forecast_status_col"]].astype(str).str.strip()
-    dataframe["future_launch_2026"] = pd.to_numeric(
-        dataframe[config["forecast_future_2026_col"]], errors="coerce"
-    ).fillna(0)
-    dataframe["future_launch_2027"] = 0
-    dataframe["future_launch_total"] = dataframe["future_launch_2026"]
-    dataframe["latitude"] = pd.to_numeric(dataframe[config["forecast_lat_col"]], errors="coerce")
-    dataframe["longitude"] = pd.to_numeric(dataframe[config["forecast_long_col"]], errors="coerce")
-    dataframe = dataframe[
-        dataframe["project_id"].notna()
-        & dataframe["latitude"].notna()
-        & dataframe["longitude"].notna()
-        & (dataframe["future_launch_total"] > 0)
-        & (dataframe["quarter_sort"] > 0)
-    ].copy()
-    return dataframe[
-        [
-            "city",
-            "segment",
-            "region",
-            "grading",
-            "quarter",
-            "quarter_sort",
-            "project_id",
-            "project_name",
-            "developer",
-            "latitude",
-            "longitude",
-            "sale_status",
-            "future_launch_2026",
-            "future_launch_2027",
-            "future_launch_total",
-        ]
-    ]
 
 
 def load_city_boundaries() -> dict[str, Any]:
@@ -616,14 +608,35 @@ def summarize_dimension_breakdown(
 def build_dataset() -> dict[str, Any]:
     base_dir = resolve_shortcut(SHORTCUT_PATH)
     city_frames = []
+    future_frames_by_label: dict[str, list[pd.DataFrame]] = {"2026F": [], "2027F": []}
     for config in WORKBOOK_CONFIGS:
         city_frames.append(attach_first_launch_flags(load_city_rows(base_dir, config)))
+        if config.get("future_launch_col"):
+            future_frames_by_label["2026F"].append(
+                load_future_map_rows(
+                    base_dir,
+                    config,
+                    "2026F",
+                    config["future_launch_col"],
+                    config.get("future_sold_col"),
+                )
+            )
+        if config.get("future_2027_launch_col"):
+            future_frames_by_label["2027F"].append(
+                load_future_map_rows(
+                    base_dir,
+                    config,
+                    "2027F",
+                    config["future_2027_launch_col"],
+                    config.get("future_2027_sold_col"),
+                )
+            )
 
     dataset: list[dict[str, Any]] = []
     dimension_breakdowns: list[dict[str, Any]] = []
     segment_map: dict[str, list[str]] = {}
     map_points: list[dict[str, Any]] = []
-    future_map_points: list[dict[str, Any]] = []
+    future_map_sets: dict[str, list[dict[str, Any]]] = {"2026F": [], "2027F": []}
     for city_frame in city_frames:
         city_name = city_frame["city"].iloc[0]
         segments = sorted(city_frame["segment"].dropna().unique().tolist())
@@ -666,12 +679,10 @@ def build_dataset() -> dict[str, Any]:
             [
                 "city",
                 "segment",
-                "grading",
                 "quarter",
                 "quarter_sort",
                 "project_id",
                 "project_name",
-                "developer",
                 "project_latitude",
                 "project_longitude",
                 "price",
@@ -694,52 +705,41 @@ def build_dataset() -> dict[str, Any]:
             json.loads(point_rows.to_json(orient="records", force_ascii=False))
         )
 
-        if city_name == "HCMC":
-            future_rows = city_frame[
-                city_frame["is_actual_project"]
-                & city_frame["project_latitude"].notna()
-                & city_frame["project_longitude"].notna()
-                & (
-                    city_frame["future_launch_2026"].fillna(0).gt(0)
-                    | city_frame["future_launch_2027"].fillna(0).gt(0)
-                )
+    for future_label, future_frames in future_frames_by_label.items():
+        for future_frame in future_frames:
+            point_rows = future_frame[
+                future_frame["project_latitude"].notna()
+                & future_frame["project_longitude"].notna()
             ][
                 [
                     "city",
                     "segment",
-                    "region",
                     "grading",
+                    "region",
                     "quarter",
                     "quarter_sort",
                     "project_id",
                     "project_name",
-                    "developer",
+                    "project_developer",
                     "project_latitude",
                     "project_longitude",
-                    "sale_status",
                     "future_launch_2026",
-                    "future_launch_2027",
+                    "future_sold_2026",
+                    "price",
+                    "sale_status",
+                    "future_label",
                 ]
             ].copy()
-            future_rows["future_launch_total"] = (
-                future_rows["future_launch_2026"].fillna(0)
-                + future_rows["future_launch_2027"].fillna(0)
-            )
-            future_rows = future_rows.rename(
+            point_rows = point_rows.rename(
                 columns={
                     "project_latitude": "latitude",
                     "project_longitude": "longitude",
+                    "project_developer": "developer",
                 }
             )
-            future_map_points.extend(
-                json.loads(future_rows.to_json(orient="records", force_ascii=False))
+            future_map_sets[future_label].extend(
+                json.loads(point_rows.to_json(orient="records", force_ascii=False))
             )
-
-    hanoi_config = next(config for config in WORKBOOK_CONFIGS if config["city"] == "Hanoi")
-    hanoi_future_rows = load_hanoi_future_rows(base_dir, hanoi_config)
-    future_map_points.extend(
-        json.loads(hanoi_future_rows.to_json(orient="records", force_ascii=False))
-    )
 
     quarter_list = sorted(
         {record["quarter"] for record in dataset},
@@ -750,7 +750,7 @@ def build_dataset() -> dict[str, Any]:
         "records": dataset,
         "dimension_breakdowns": dimension_breakdowns,
         "map_points": map_points,
-        "future_map_points": future_map_points,
+        "future_map_sets": future_map_sets,
         "city_boundaries": load_city_boundaries(),
         "segments": segment_map,
         "markets": [config["city"] for config in WORKBOOK_CONFIGS],
@@ -1044,34 +1044,6 @@ def build_html(dataset: dict[str, Any]) -> str:
       align-items: baseline;
       margin-bottom: 12px;
     }}
-    .panel[data-export-key] {{
-      position: relative;
-    }}
-    .panel[data-export-key] .chart-head {{
-      padding-right: 116px;
-    }}
-    .export-button {{
-      position: absolute;
-      top: 18px;
-      right: 18px;
-      border: 1px solid rgba(76, 135, 204, 0.24);
-      background: var(--panel-2);
-      color: var(--ink);
-      border-radius: 999px;
-      padding: 7px 12px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-      z-index: 2;
-    }}
-    .export-button:hover {{
-      transform: translateY(-1px);
-      border-color: rgba(58, 124, 235, 0.36);
-      box-shadow: 0 10px 20px rgba(58, 124, 235, 0.12);
-    }}
     .chart-title {{
       margin: 0;
       font-size: 18px;
@@ -1151,8 +1123,7 @@ def build_html(dataset: dict[str, Any]) -> str:
       line-height: 1.55;
       color: var(--muted);
     }}
-    #projectMap,
-    #futureProjectMap {{
+    #projectMap {{
       width: 100%;
       height: 460px;
       border-radius: 18px;
@@ -1330,14 +1301,14 @@ def build_html(dataset: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="compare-grid">
-        <article class="panel chart-card" data-export-key="flow-compare">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title" id="flowCompareTitle">Flow Comparison</h3>
             <span class="chart-note">Total market view</span>
           </div>
           <div class="canvas-wrap"><canvas id="chartFlowCompare"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="latest-snapshot">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Latest Quarter Snapshot</h3>
             <span class="chart-note">Fast read on current quarter totals</span>
@@ -1355,21 +1326,21 @@ def build_html(dataset: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="price-grid">
-        <article class="panel chart-card" data-export-key="hanoi-breakdown">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Hanoi Breakdown</h3>
             <span class="chart-note" id="hanoiBreakdownNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartHanoiBreakdown"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="hcmc-breakdown">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">HCMC Breakdown</h3>
             <span class="chart-note" id="hcmcBreakdownNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartHcmcBreakdown"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="segment-mix-table">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Segment Mix Table</h3>
             <span class="chart-note">Latest quarter by selected flow metric</span>
@@ -1399,35 +1370,35 @@ def build_html(dataset: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="price-grid">
-        <article class="panel chart-card" data-export-key="price-current-compare">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Weighted Price by Current Supply</h3>
             <span class="chart-note">Total Hanoi vs total HCMC</span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartPriceCurrentCompare"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="price-available-compare">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Weighted Price by Available Supply</h3>
             <span class="chart-note">Total Hanoi vs total HCMC</span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartPriceAvailableCompare"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="new-project-compare">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Average Price of New Projects</h3>
             <span class="chart-note">First-launch project cohorts</span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartNewProjectCompare"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="sold-rate-quarterly-compare">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Quarterly Sold Rate</h3>
             <span class="chart-note">New sold / current for sale at the beginning</span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartSoldRateQuarterlyCompare"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="sold-rate-cumulative-compare">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Cumulative Sold Rate</h3>
             <span class="chart-note">Current sold-out / (current supply + previous quarter available end)</span>
@@ -1445,70 +1416,70 @@ def build_html(dataset: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="deep-grid">
-        <article class="panel chart-card" data-export-key="deep-current-price">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Segment Weighted Price by Current Supply</h3>
             <span class="chart-note" id="deepCurrentNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepCurrentPrice"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="deep-available-price">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Segment Weighted Price by Available Supply</h3>
             <span class="chart-note" id="deepAvailableNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepAvailablePrice"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="deep-new-project-price">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Segment New Project Avg Price</h3>
             <span class="chart-note" id="deepNewProjectNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepNewProjectPrice"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="deep-new-projects">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Segment New Projects</h3>
             <span class="chart-note">First positive launch quarter count</span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepNewProjects"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="deep-sold-rate-quarterly">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Segment Sold Rate</h3>
             <span class="chart-note" id="deepSoldRateQuarterlyNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepSoldRateQuarterly"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="deep-sold-rate-cumulative">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Segment Cumulative Sold Rate</h3>
             <span class="chart-note" id="deepSoldRateCumulativeNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepSoldRateCumulative"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="deep-grading-mix">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Flow Mix by Grading</h3>
             <span class="chart-note" id="deepGradingMixNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepGradingMix"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="deep-region-mix">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Flow Mix by Region</h3>
             <span class="chart-note" id="deepRegionMixNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepRegionMix"></canvas></div>
         </article>
-        <article class="panel chart-card" data-export-key="deep-developer-mix">
+        <article class="panel chart-card">
           <div class="chart-head">
             <h3 class="chart-title">Flow Mix by Developer</h3>
             <span class="chart-note" id="deepDeveloperMixNote"></span>
           </div>
           <div class="canvas-wrap small"><canvas id="chartDeepDeveloperMix"></canvas></div>
         </article>
-        <article class="panel table-card" data-export-key="deep-quarterly-table">
+        <article class="panel table-card">
           <div class="chart-head">
             <h3 class="chart-title">Deep Dive Quarterly Table</h3>
             <span class="chart-note">Selected market and segment</span>
@@ -1539,34 +1510,35 @@ def build_html(dataset: dict[str, Any]) -> str:
     <section class="section-block">
       <div class="section-head">
         <div>
-          <h2>Map of Active Projects</h2>
-          <div class="section-note">Projects with sale status = current, joined from Time Series to Project Identification for latitude and longitude. This map is intentionally global and does not follow the dashboard filters.</div>
+          <h2 id="mapSectionTitle">Map of Active Projects</h2>
+          <div class="section-note" id="mapSectionNote">Projects are joined from Time Series to Project Identification for latitude and longitude.</div>
         </div>
       </div>
+      <div class="button-row" id="mapModeButtons"></div>
       <div class="map-analytics">
         <div class="map-metric-grid" id="mapMetricGrid">
           <article class="panel map-kpi-card">
-            <h3>Quarterly Sold Rate</h3>
+            <h3 id="mapKpi1Title">Quarterly Sold Rate</h3>
             <strong id="mapQuarterlySoldRate">-</strong>
             <p id="mapQuarterlySoldRateNote">Latest quarter aggregate for mapped active projects.</p>
           </article>
           <article class="panel map-kpi-card">
-            <h3>Accumulated Sold Rate</h3>
+            <h3 id="mapKpi2Title">Accumulated Sold Rate</h3>
             <strong id="mapAccumulatedSoldRate">-</strong>
             <p id="mapAccumulatedSoldRateNote">Current sold-out divided by current supply plus previous quarter available end.</p>
           </article>
         </div>
         <div class="map-chart-grid">
-          <article class="panel chart-card" data-export-key="map-launch-segment">
+          <article class="panel chart-card">
             <div class="chart-head">
-              <h3 class="chart-title">New Launched by Segment</h3>
+              <h3 class="chart-title" id="mapChart1Title">New Launched by Segment</h3>
               <span class="chart-note" id="mapLaunchChartNote"></span>
             </div>
             <div class="canvas-wrap small"><canvas id="chartMapLaunchSegment"></canvas></div>
           </article>
-          <article class="panel chart-card" data-export-key="map-sold-segment">
+          <article class="panel chart-card">
             <div class="chart-head">
-              <h3 class="chart-title">New Sold by Segment</h3>
+              <h3 class="chart-title" id="mapChart2Title">New Sold by Segment</h3>
               <span class="chart-note" id="mapSoldChartNote"></span>
             </div>
             <div class="canvas-wrap small"><canvas id="chartMapSoldSegment"></canvas></div>
@@ -1574,17 +1546,17 @@ def build_html(dataset: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="map-shell">
-        <article class="panel chart-card" data-export-key="project-map">
+        <article class="panel chart-card">
           <div class="chart-head">
-            <h3 class="chart-title">Project Map</h3>
+            <h3 class="chart-title" id="projectMapTitle">Project Map</h3>
             <span class="chart-note" id="mapNote"></span>
           </div>
           <div id="projectMap"></div>
         </article>
-        <article class="panel chart-card" data-export-key="active-project-list">
+        <article class="panel chart-card">
           <div class="chart-head">
-            <h3 class="chart-title">Active Project List</h3>
-            <span class="chart-note">Mapped projects in the latest quarter available in the source</span>
+            <h3 class="chart-title" id="projectListTitle">Project List</h3>
+            <span class="chart-note" id="projectListNote">Mapped projects in the selected map mode.</span>
           </div>
           <div class="project-filter-row" id="projectCityFilterButtons"></div>
           <div class="project-table-wrap">
@@ -1599,49 +1571,7 @@ def build_html(dataset: dict[str, Any]) -> str:
       </div>
     </section>
 
-    <section class="section-block">
-      <div class="section-head">
-        <div>
-          <h2>Map of Future Projects</h2>
-          <div class="section-note">Future launches follow the selected report quarter. HCMC uses the quarterly Time Series forecast columns `2026F` and `2027F`. Hanoi uses the `Forecast Q2.2026` visual sheet and `2026 Base New`.</div>
-        </div>
-      </div>
-      <div class="map-shell">
-        <article class="panel chart-card" data-export-key="future-project-map">
-          <div class="chart-head">
-            <h3 class="chart-title">Future Project Map</h3>
-            <span class="chart-note" id="futureMapNote"></span>
-          </div>
-          <div id="futureProjectMap"></div>
-        </article>
-        <article class="panel chart-card" data-export-key="future-project-list">
-          <div class="chart-head">
-            <h3 class="chart-title">Future Project List</h3>
-            <span class="chart-note">Projects with planned future launches in the selected report quarter</span>
-          </div>
-          <div class="project-filter-row" id="futureProjectCityFilterButtons"></div>
-          <div class="project-table-wrap">
-            <table class="project-table">
-              <thead>
-                <tr>
-                  <th>Project</th>
-                  <th>Developer</th>
-                  <th>Market</th>
-                  <th>Segment</th>
-                  <th>Quarter</th>
-                  <th>2026 Launch</th>
-                  <th>2027 Launch</th>
-                  <th>Future Total</th>
-                </tr>
-              </thead>
-              <tbody id="futureProjectListBody"></tbody>
-            </table>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section class="panel table-card" data-export-key="quarterly-compare-table">
+    <section class="panel table-card">
       <div class="chart-head">
         <h3 class="chart-title">Quarterly Compare Table</h3>
         <span class="chart-note">Total Hanoi and total HCMC side by side</span>
@@ -1681,8 +1611,8 @@ def build_html(dataset: dict[str, Any]) -> str:
       flowMetric: "new_launched",
       deepCity: "Hanoi",
       deepSegment: "Total",
+      mapMode: "active_2026Q2",
       mapCityFilter: "All",
-      futureMapCityFilter: "All",
       startQuarter: dashboardData.quarters.find((quarter) => quarterSort(quarter) >= quarterSort("2022Q1")) || dashboardData.quarters[0],
       endQuarter: dashboardData.quarters[dashboardData.quarters.length - 1],
       projectSortKey: "current_supply",
@@ -1693,9 +1623,6 @@ def build_html(dataset: dict[str, Any]) -> str:
     let projectMap = null;
     let projectMarkers = [];
     let cityBoundaryLayers = [];
-    let futureProjectMap = null;
-    let futureProjectMarkers = [];
-    let futureCityBoundaryLayers = [];
     const cityColors = {{
       Hanoi: "#1B4D5C",
       HCMC: "#3281F5",
@@ -1761,6 +1688,7 @@ def build_html(dataset: dict[str, Any]) -> str:
     dashboardData.map_points.forEach((point) => {{
       projectQuarterLookup.set(`${{point.city}}::${{point.project_id}}::${{point.quarter}}`, point);
     }});
+    const ACTIVE_MAP_QUARTER = "2026Q2";
 
     function formatNumber(value, kind = "number") {{
       if (value === null || value === undefined || Number.isNaN(value)) {{
@@ -1834,14 +1762,40 @@ def build_html(dataset: dict[str, Any]) -> str:
       return `${{year}}Q${{quarterNo - 1}}`;
     }}
 
+    function mapModeLabel() {{
+      if (state.mapMode === "active_2026Q2") {{
+        return "Active Projects 2026Q2";
+      }}
+      if (state.mapMode === "future_2026F") {{
+        return "Project Map 2026F";
+      }}
+      if (state.mapMode === "future_2027F") {{
+        return "Project Map 2027F";
+      }}
+      return "Project Map";
+    }}
+
     function latestMapQuarter() {{
-      return dashboardData.quarters[dashboardData.quarters.length - 1];
+      if (state.mapMode === "active_2026Q2") {{
+        return ACTIVE_MAP_QUARTER;
+      }}
+      const label = state.mapMode === "future_2027F" ? "2027F" : "2026F";
+      const points = dashboardData.future_map_sets?.[label] || [];
+      const maxSort = points.reduce((maxValue, row) => Math.max(maxValue, Number(row.quarter_sort ?? -1)), -1);
+      const latest = points.find((row) => Number(row.quarter_sort ?? -1) === maxSort);
+      return latest?.quarter ?? dashboardData.quarters[dashboardData.quarters.length - 1];
     }}
 
     function latestMapPoints() {{
-      return dashboardData.map_points
+      if (state.mapMode === "active_2026Q2") {{
+        return dashboardData.map_points
+          .filter((row) => row.quarter === ACTIVE_MAP_QUARTER)
+          .sort((a, b) => (b.current_supply ?? 0) - (a.current_supply ?? 0));
+      }}
+      const label = state.mapMode === "future_2027F" ? "2027F" : "2026F";
+      return (dashboardData.future_map_sets?.[label] || [])
         .filter((row) => row.quarter === latestMapQuarter())
-        .sort((a, b) => (b.current_supply ?? 0) - (a.current_supply ?? 0));
+        .sort((a, b) => (b.future_launch_2026 ?? 0) - (a.future_launch_2026 ?? 0));
     }}
 
     function previousPoint(point) {{
@@ -1853,38 +1807,49 @@ def build_html(dataset: dict[str, Any]) -> str:
     }}
 
     function quarterlySoldRateForPoint(point) {{
-      const denominator = Number(point.available_begin ?? 0);
-      if (!Number.isFinite(denominator) || denominator <= 0) {{
-        return null;
-      }}
-      return (Number(point.new_sold ?? 0) / denominator) * 100;
+      return Number.isFinite(Number(point.future_launch_2026))
+        ? Number(point.future_launch_2026)
+        : null;
     }}
 
     function accumulatedSoldRateForPoint(point) {{
-      const prev = previousPoint(point);
-      const denominator = Number(point.current_supply ?? 0) + Number(prev?.available_end ?? 0);
-      if (!Number.isFinite(denominator) || denominator <= 0) {{
-        return null;
-      }}
-      return (Number(point.current_sold_out ?? 0) / denominator) * 100;
+      return Number.isFinite(Number(point.future_sold_2026))
+        ? Number(point.future_sold_2026)
+        : null;
     }}
 
     function aggregateMapMetrics(points) {{
-      let totalNewSold = 0;
-      let totalAvailableBegin = 0;
-      let totalCurrentSoldOut = 0;
-      let totalAccumulatedDenominator = 0;
+      if (state.mapMode === "active_2026Q2") {{
+        let totalNewSold = 0;
+        let totalAvailableBegin = 0;
+        let totalCurrentSoldOut = 0;
+        let totalAccumulatedDenominator = 0;
+
+        points.forEach((point) => {{
+          totalNewSold += Number(point.new_sold ?? 0);
+          totalAvailableBegin += Number(point.available_begin ?? 0);
+          totalCurrentSoldOut += Number(point.current_sold_out ?? 0);
+          totalAccumulatedDenominator += Number(point.current_supply ?? 0) + Number(previousPoint(point)?.available_end ?? 0);
+        }});
+
+        return {{
+          quarterlySoldRate: totalAvailableBegin > 0 ? (totalNewSold / totalAvailableBegin) * 100 : null,
+          accumulatedSoldRate: totalAccumulatedDenominator > 0 ? (totalCurrentSoldOut / totalAccumulatedDenominator) * 100 : null,
+        }};
+      }}
+
+      let totalFutureLaunch = 0;
+      let totalFutureSold = 0;
 
       points.forEach((point) => {{
-        totalNewSold += Number(point.new_sold ?? 0);
-        totalAvailableBegin += Number(point.available_begin ?? 0);
-        totalCurrentSoldOut += Number(point.current_sold_out ?? 0);
-        totalAccumulatedDenominator += Number(point.current_supply ?? 0) + Number(previousPoint(point)?.available_end ?? 0);
+        totalFutureLaunch += Number(point.future_launch_2026 ?? 0);
+        totalFutureSold += Number(point.future_sold_2026 ?? 0);
       }});
 
       return {{
-        quarterlySoldRate: totalAvailableBegin > 0 ? (totalNewSold / totalAvailableBegin) * 100 : null,
-        accumulatedSoldRate: totalAccumulatedDenominator > 0 ? (totalCurrentSoldOut / totalAccumulatedDenominator) * 100 : null,
+        totalFutureLaunch,
+        totalFutureSold,
+        projectCount: points.length,
       }};
     }}
 
@@ -1979,420 +1944,6 @@ def build_html(dataset: dict[str, Any]) -> str:
       return ((currentValue - previousValue) / previousValue) * 100;
     }}
 
-    function sanitizeFilename(value) {{
-      return String(value ?? "export")
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "") || "export";
-    }}
-
-    function csvCell(value) {{
-      if (value === null || value === undefined) {{
-        return "";
-      }}
-      const text = String(value);
-      if (/[",\\n]/.test(text)) {{
-        return `"${{text.replace(/"/g, '""')}}"`;
-      }}
-      return text;
-    }}
-
-    function downloadRowsAsCsv(filename, rows) {{
-      const safeRows = rows.length ? rows : [{{ note: "No data available" }}];
-      const headers = [...new Set(safeRows.flatMap((row) => Object.keys(row)))];
-      const lines = [
-        headers.map(csvCell).join(","),
-        ...safeRows.map((row) => headers.map((header) => csvCell(row[header])).join(",")),
-      ];
-      const blob = new Blob([lines.join("\\n")], {{ type: "text/csv;charset=utf-8;" }});
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    }}
-
-    function timeframeSlug() {{
-      return `${{state.startQuarter}}_to_${{state.endQuarter}}`;
-    }}
-
-    function latestSnapshotRows() {{
-      return ["Hanoi", "HCMC"].map((city) => {{
-        const latest = latestRecord(city, "Total");
-        return {{
-          market: city,
-          quarter: latest?.quarter ?? "",
-          flow_metric: metricLabels[state.flowMetric],
-          value: latest?.[state.flowMetric] ?? null,
-        }};
-      }});
-    }}
-
-    function compareMetricRows(metricKey) {{
-      const labels = unionQuarterLabels([["Hanoi", "Total"], ["HCMC", "Total"]]);
-      return labels.flatMap((quarter) => {{
-        return ["Hanoi", "HCMC"].map((city) => {{
-          const row = filteredRecordsFor(city, "Total").find((item) => item.quarter === quarter);
-          return {{
-            quarter,
-            market: city,
-            metric: metricLabels[metricKey],
-            value: row?.[metricKey] ?? null,
-          }};
-        }});
-      }});
-    }}
-
-    function breakdownRows(city, segments) {{
-      const labels = unionQuarterLabels(segments.map((segment) => [city, segment]));
-      return labels.flatMap((quarter) => segments.map((segment) => {{
-        const row = filteredRecordsFor(city, segment).find((item) => item.quarter === quarter);
-        return {{
-          quarter,
-          market: city,
-          segment,
-          flow_metric: metricLabels[state.flowMetric],
-          value: row?.[state.flowMetric] ?? null,
-        }};
-      }}));
-    }}
-
-    function segmentMixRows() {{
-      return [
-        ["Hanoi", ["Central Hanoi", "Van Giang HY"]],
-        ["HCMC", ["Central HCMC", "Binh Duong", "BR-VT"]],
-      ].flatMap(([city, segments]) => segments.map((segment) => {{
-        const latest = latestRecord(city, segment);
-        return {{
-          market: city,
-          segment,
-          latest_quarter: latest?.quarter ?? "",
-          flow_metric: metricLabels[state.flowMetric],
-          value: latest?.[state.flowMetric] ?? null,
-        }};
-      }}));
-    }}
-
-    function deepMetricRows(metricKey) {{
-      return filteredRecordsFor(state.deepCity, state.deepSegment).map((row) => {{
-        return {{
-          quarter: row.quarter,
-          market: state.deepCity,
-          segment: state.deepSegment,
-          metric: metricLabels[metricKey],
-          value: row?.[metricKey] ?? null,
-        }};
-      }});
-    }}
-
-    function developerPieRows(rows, metricKey) {{
-      const labels = dimensionQuarterLabels(state.deepCity, state.deepSegment, "developer");
-      const latestQuarter = labels[labels.length - 1];
-      const latestRows = rows.filter((row) => row.quarter === latestQuarter);
-      const totals = new Map();
-      latestRows.forEach((row) => {{
-        totals.set(row.dimension_value, (totals.get(row.dimension_value) || 0) + Number(row[metricKey] ?? 0));
-      }});
-      const ordered = [...totals.entries()].sort((a, b) => b[1] - a[1]);
-      const masteriseIndex = ordered.findIndex(
-        ([label]) => String(label).trim().toLowerCase() === "masterise homes"
-      );
-      let selected = ordered.slice(0, 5);
-      if (masteriseIndex >= 5) {{
-        selected = [...selected.slice(0, 4), ordered[masteriseIndex]];
-      }}
-      const selectedLabels = new Set(selected.map(([label]) => label));
-      const otherValue = ordered
-        .filter(([label]) => !selectedLabels.has(label))
-        .reduce((sum, [, value]) => sum + value, 0);
-      const pieRows = selected.map(([dimension_value, value]) => ({{
-        quarter: latestQuarter,
-        market: state.deepCity,
-        segment: state.deepSegment,
-        dimension_type: "developer",
-        dimension_value,
-        flow_metric: metricLabels[metricKey],
-        value,
-        grouping: "Selected",
-      }}));
-      if (otherValue > 0) {{
-        pieRows.push({{
-          quarter: latestQuarter,
-          market: state.deepCity,
-          segment: state.deepSegment,
-          dimension_type: "developer",
-          dimension_value: "Other",
-          flow_metric: metricLabels[metricKey],
-          value: otherValue,
-          grouping: "Other",
-        }});
-      }}
-      return pieRows;
-    }}
-
-    function deepDimensionRows(dimensionType) {{
-      const metricKey = state.flowMetric;
-      const rows = filteredDimensionRecordsFor(state.deepCity, state.deepSegment, dimensionType);
-      if (dimensionType === "developer") {{
-        return developerPieRows(rows, metricKey);
-      }}
-      return rows.map((row) => {{
-        return {{
-          quarter: row.quarter,
-          market: row.city,
-          segment: row.segment,
-          dimension_type: row.dimension_type,
-          dimension_value: row.dimension_value,
-          flow_metric: metricLabels[metricKey],
-          value: row[metricKey] ?? null,
-        }};
-      }});
-    }}
-
-    function deepTableRows() {{
-      return [...recordsFor(state.deepCity, state.deepSegment)]
-        .filter((row) => isQuarterInRange(row.quarter))
-        .map((row) => {{
-          return {{
-            quarter: row.quarter,
-            market: state.deepCity,
-            segment: state.deepSegment,
-            new_launched: row.new_launched,
-            new_sold: row.new_sold,
-            price_current: row.weighted_price_current_supply,
-            price_available: row.weighted_price_available_supply,
-            new_project_avg_price: row.new_project_avg_price,
-            quarterly_sold_rate: row.sold_rate_quarterly,
-            cumulative_sold_rate: row.sold_rate_cumulative,
-            active_projects: row.active_projects,
-            new_projects: row.new_projects,
-          }};
-        }});
-    }}
-
-    function quarterlyCompareRows() {{
-      const labels = unionQuarterLabels([["Hanoi", "Total"], ["HCMC", "Total"]]).reverse();
-      const hanoi = new Map(filteredRecordsFor("Hanoi", "Total").map((row) => [row.quarter, row]));
-      const hcmc = new Map(filteredRecordsFor("HCMC", "Total").map((row) => [row.quarter, row]));
-      return labels.map((quarter) => {{
-        const hn = hanoi.get(quarter);
-        const hc = hcmc.get(quarter);
-        return {{
-          quarter,
-          hanoi_launched: hn?.new_launched ?? null,
-          hcmc_launched: hc?.new_launched ?? null,
-          hanoi_sold: hn?.new_sold ?? null,
-          hcmc_sold: hc?.new_sold ?? null,
-          hanoi_quarterly_sold_rate: hn?.sold_rate_quarterly ?? null,
-          hcmc_quarterly_sold_rate: hc?.sold_rate_quarterly ?? null,
-          hanoi_cumulative_sold_rate: hn?.sold_rate_cumulative ?? null,
-          hcmc_cumulative_sold_rate: hc?.sold_rate_cumulative ?? null,
-          hanoi_active_projects: hn?.active_projects ?? null,
-          hcmc_active_projects: hc?.active_projects ?? null,
-          hanoi_price_current: hn?.weighted_price_current_supply ?? null,
-          hcmc_price_current: hc?.weighted_price_current_supply ?? null,
-        }};
-      }});
-    }}
-
-    function mapSegmentRows(metricKey) {{
-      const latestQuarter = latestMapQuarter();
-      return latestMapPoints().map((point) => point.segment)
-        .filter((segment, index, all) => segment && all.indexOf(segment) === index)
-        .flatMap((segment) => ["Hanoi", "HCMC"].map((city) => {{
-          const points = latestMapPoints().filter((point) => point.city === city && point.segment === segment);
-          return {{
-            quarter: latestQuarter,
-            market: city,
-            segment,
-            metric: metricLabels[metricKey],
-            value: points.reduce((sum, point) => sum + Number(point[metricKey] ?? 0), 0),
-          }};
-        }}));
-    }}
-
-    function mappedProjectRows(points) {{
-      return points.map((point) => {{
-        const quarterlySoldRate = quarterlySoldRateForPoint(point);
-        const accumulatedSoldRate = accumulatedSoldRateForPoint(point);
-        return {{
-          project_name: point.project_name,
-          developer: point.developer || "",
-          grading: point.grading || "",
-          market: point.city,
-          segment: point.segment,
-          quarter: point.quarter,
-          latitude: point.latitude,
-          longitude: point.longitude,
-          new_launched: point.new_launched,
-          new_sold: point.new_sold,
-          current_supply: point.current_supply,
-          available_begin: point.available_begin,
-          quarterly_sold_rate: quarterlySoldRate,
-          accumulated_sold_rate: accumulatedSoldRate,
-          price: point.price,
-        }};
-      }});
-    }}
-
-    function futureMappedProjectRows(points) {{
-      return points.map((point) => {{
-        return {{
-          project_name: point.project_name,
-          developer: point.developer || "",
-          grading: point.grading || "",
-          market: point.city,
-          segment: point.segment,
-          quarter: point.quarter,
-          latitude: point.latitude,
-          longitude: point.longitude,
-          future_launch_2026: point.future_launch_2026 ?? null,
-          future_launch_2027: point.future_launch_2027 ?? null,
-          future_launch_total: point.future_launch_total ?? null,
-          sale_status: point.sale_status || "",
-        }};
-      }});
-    }}
-
-    function exportPayloadFor(key) {{
-      const payloads = {{
-        "flow-compare": () => ({{
-          filename: `flow-compare-${{sanitizeFilename(metricLabels[state.flowMetric])}}-${{timeframeSlug()}}.csv`,
-          rows: compareMetricRows(state.flowMetric),
-        }}),
-        "latest-snapshot": () => ({{
-          filename: `latest-quarter-snapshot-${{sanitizeFilename(metricLabels[state.flowMetric])}}.csv`,
-          rows: latestSnapshotRows(),
-        }}),
-        "hanoi-breakdown": () => ({{
-          filename: `hanoi-breakdown-${{sanitizeFilename(metricLabels[state.flowMetric])}}-${{timeframeSlug()}}.csv`,
-          rows: breakdownRows("Hanoi", ["Central Hanoi", "Van Giang HY"]),
-        }}),
-        "hcmc-breakdown": () => ({{
-          filename: `hcmc-breakdown-${{sanitizeFilename(metricLabels[state.flowMetric])}}-${{timeframeSlug()}}.csv`,
-          rows: breakdownRows("HCMC", ["Central HCMC", "Binh Duong", "BR-VT"]),
-        }}),
-        "segment-mix-table": () => ({{
-          filename: `segment-mix-${{sanitizeFilename(metricLabels[state.flowMetric])}}.csv`,
-          rows: segmentMixRows(),
-        }}),
-        "price-current-compare": () => ({{
-          filename: `weighted-price-current-supply-${{timeframeSlug()}}.csv`,
-          rows: compareMetricRows("weighted_price_current_supply"),
-        }}),
-        "price-available-compare": () => ({{
-          filename: `weighted-price-available-supply-${{timeframeSlug()}}.csv`,
-          rows: compareMetricRows("weighted_price_available_supply"),
-        }}),
-        "new-project-compare": () => ({{
-          filename: `average-price-new-projects-${{timeframeSlug()}}.csv`,
-          rows: compareMetricRows("new_project_avg_price"),
-        }}),
-        "sold-rate-quarterly-compare": () => ({{
-          filename: `quarterly-sold-rate-${{timeframeSlug()}}.csv`,
-          rows: compareMetricRows("sold_rate_quarterly"),
-        }}),
-        "sold-rate-cumulative-compare": () => ({{
-          filename: `cumulative-sold-rate-${{timeframeSlug()}}.csv`,
-          rows: compareMetricRows("sold_rate_cumulative"),
-        }}),
-        "deep-current-price": () => ({{
-          filename: `deep-current-price-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
-          rows: deepMetricRows("weighted_price_current_supply"),
-        }}),
-        "deep-available-price": () => ({{
-          filename: `deep-available-price-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
-          rows: deepMetricRows("weighted_price_available_supply"),
-        }}),
-        "deep-new-project-price": () => ({{
-          filename: `deep-new-project-price-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
-          rows: deepMetricRows("new_project_avg_price"),
-        }}),
-        "deep-new-projects": () => ({{
-          filename: `deep-new-projects-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
-          rows: deepMetricRows("new_projects"),
-        }}),
-        "deep-sold-rate-quarterly": () => ({{
-          filename: `deep-quarterly-sold-rate-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
-          rows: deepMetricRows("sold_rate_quarterly"),
-        }}),
-        "deep-sold-rate-cumulative": () => ({{
-          filename: `deep-cumulative-sold-rate-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
-          rows: deepMetricRows("sold_rate_cumulative"),
-        }}),
-        "deep-grading-mix": () => ({{
-          filename: `deep-grading-mix-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{sanitizeFilename(metricLabels[state.flowMetric])}}-${{timeframeSlug()}}.csv`,
-          rows: deepDimensionRows("grading"),
-        }}),
-        "deep-region-mix": () => ({{
-          filename: `deep-region-mix-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{sanitizeFilename(metricLabels[state.flowMetric])}}-${{timeframeSlug()}}.csv`,
-          rows: deepDimensionRows("region"),
-        }}),
-        "deep-developer-mix": () => ({{
-          filename: `deep-developer-mix-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{sanitizeFilename(metricLabels[state.flowMetric])}}.csv`,
-          rows: deepDimensionRows("developer"),
-        }}),
-        "deep-quarterly-table": () => ({{
-          filename: `deep-quarterly-table-${{sanitizeFilename(state.deepCity)}}-${{sanitizeFilename(state.deepSegment)}}-${{timeframeSlug()}}.csv`,
-          rows: deepTableRows(),
-        }}),
-        "map-launch-segment": () => ({{
-          filename: `map-new-launched-by-segment-${{latestMapQuarter()}}.csv`,
-          rows: mapSegmentRows("new_launched"),
-        }}),
-        "map-sold-segment": () => ({{
-          filename: `map-new-sold-by-segment-${{latestMapQuarter()}}.csv`,
-          rows: mapSegmentRows("new_sold"),
-        }}),
-        "project-map": () => ({{
-          filename: `project-map-points-${{sanitizeFilename(state.mapCityFilter)}}-${{latestMapQuarter()}}.csv`,
-          rows: mappedProjectRows(filteredProjectPoints(latestMapPoints())),
-        }}),
-        "active-project-list": () => ({{
-          filename: `active-project-list-${{sanitizeFilename(state.mapCityFilter)}}-${{latestMapQuarter()}}.csv`,
-          rows: mappedProjectRows(filteredProjectPoints(latestMapPoints())),
-        }}),
-        "future-project-map": () => ({{
-          filename: `future-project-map-${{sanitizeFilename(state.futureMapCityFilter)}}-${{state.endQuarter}}.csv`,
-          rows: futureMappedProjectRows(filteredFutureProjectPoints(futureMapPointsForQuarter(state.endQuarter))),
-        }}),
-        "future-project-list": () => ({{
-          filename: `future-project-list-${{sanitizeFilename(state.futureMapCityFilter)}}-${{state.endQuarter}}.csv`,
-          rows: futureMappedProjectRows(filteredFutureProjectPoints(futureMapPointsForQuarter(state.endQuarter))),
-        }}),
-        "quarterly-compare-table": () => ({{
-          filename: `quarterly-compare-table-${{timeframeSlug()}}.csv`,
-          rows: quarterlyCompareRows(),
-        }}),
-      }};
-      return payloads[key] ? payloads[key]() : null;
-    }}
-
-    function initializeExportButtons() {{
-      document.querySelectorAll("[data-export-key]").forEach((panel) => {{
-        if (panel.querySelector(".export-button")) {{
-          return;
-        }}
-        const key = panel.dataset.exportKey;
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "export-button";
-        button.textContent = "CSV";
-        button.addEventListener("click", () => {{
-          const payload = exportPayloadFor(key);
-          if (!payload) {{
-            return;
-          }}
-          downloadRowsAsCsv(payload.filename, payload.rows);
-        }});
-        panel.appendChild(button);
-      }});
-    }}
-
     function renderToggleRow(hostId, options, activeValue, onClick) {{
       const host = document.getElementById(hostId);
       host.innerHTML = "";
@@ -2422,38 +1973,52 @@ def build_html(dataset: dict[str, Any]) -> str:
       );
     }}
 
-    function renderFutureProjectCityFilterButtons() {{
+    function renderMapModeButtons() {{
       renderToggleRow(
-        "futureProjectCityFilterButtons",
+        "mapModeButtons",
         [
-          ["All", "All"],
-          ["Hanoi", "Hanoi"],
-          ["HCMC", "HCMC"],
+          ["active_2026Q2", "Active 2026Q2"],
+          ["future_2026F", "Project Map 2026F"],
+          ["future_2027F", "Project Map 2027F"],
         ],
-        state.futureMapCityFilter,
+        state.mapMode,
         (value) => {{
-          state.futureMapCityFilter = value;
-          renderFutureProjectCityFilterButtons();
-          renderFutureMap();
+          state.mapMode = value;
+          state.projectSortKey = value === "active_2026Q2" ? "current_supply" : "future_launch_2026";
+          state.projectSortDirection = "desc";
+          renderMapModeButtons();
+          renderProjectTableHeaders();
+          renderMap();
         }}
       );
     }}
 
     function renderProjectTableHeaders() {{
-      const headers = [
-        ["project_name", "Project"],
-        ["developer", "Developer"],
-        ["city", "Market"],
-        ["segment", "Segment"],
-        ["quarter", "Quarter"],
-        ["new_launched", "New launched"],
-        ["new_sold", "New sold"],
-        ["current_supply", "Current supply"],
-        ["available_begin", "Available begin"],
-        ["quarterly_sold_rate", "Quarterly sold rate"],
-        ["accumulated_sold_rate", "Accumulated sold rate"],
-        ["price", "Price"],
-      ];
+      const headers = state.mapMode === "active_2026Q2"
+        ? [
+            ["project_name", "Project"],
+            ["city", "Market"],
+            ["segment", "Segment"],
+            ["quarter", "Quarter"],
+            ["new_launched", "New launched"],
+            ["new_sold", "New sold"],
+            ["current_supply", "Current supply"],
+            ["available_begin", "Available begin"],
+            ["sale_status", "Sale status"],
+            ["price", "Price"],
+          ]
+        : [
+            ["project_name", "Project"],
+            ["city", "Market"],
+            ["segment", "Segment"],
+            ["quarter", "Quarter"],
+            ["sale_status", "Sale status"],
+            ["future_launch_2026", `${{state.mapMode === "future_2027F" ? "2027F" : "2026F"}} launch`],
+            ["future_sold_2026", `${{state.mapMode === "future_2027F" ? "2027F" : "2026F"}} sold`],
+            ["grading", "Grading"],
+            ["region", "Region"],
+            ["price", "Price"],
+          ];
       const row = document.getElementById("projectTableHeaderRow");
       row.innerHTML = "";
       headers.forEach(([key, label]) => {{
@@ -2467,7 +2032,7 @@ def build_html(dataset: dict[str, Any]) -> str:
             state.projectSortDirection = state.projectSortDirection === "asc" ? "desc" : "asc";
           }} else {{
             state.projectSortKey = key;
-            state.projectSortDirection = ["project_name", "developer", "city", "segment", "quarter"].includes(key) ? "asc" : "desc";
+            state.projectSortDirection = ["project_name", "city", "segment", "quarter", "sale_status", "grading", "region"].includes(key) ? "asc" : "desc";
           }}
           renderProjectTableHeaders();
           renderMap();
@@ -2481,19 +2046,6 @@ def build_html(dataset: dict[str, Any]) -> str:
         return points;
       }}
       return points.filter((point) => point.city === state.mapCityFilter);
-    }}
-
-    function futureMapPointsForQuarter(quarter) {{
-      return dashboardData.future_map_points
-        .filter((row) => row.quarter === quarter)
-        .sort((a, b) => Number(b.future_launch_total ?? 0) - Number(a.future_launch_total ?? 0));
-    }}
-
-    function filteredFutureProjectPoints(points) {{
-      if (state.futureMapCityFilter === "All") {{
-        return points;
-      }}
-      return points.filter((point) => point.city === state.futureMapCityFilter);
     }}
 
     function renderSummary() {{
@@ -2541,46 +2093,6 @@ def build_html(dataset: dict[str, Any]) -> str:
       }}
       charts[chartId] = new Chart(document.getElementById(chartId), config);
     }}
-
-    const piePercentageLabelPlugin = {{
-      id: "piePercentageLabelPlugin",
-      afterDatasetsDraw(chart) {{
-        if (chart.config.type !== "pie") {{
-          return;
-        }}
-        const dataset = chart.data.datasets?.[0];
-        const meta = chart.getDatasetMeta(0);
-        if (!dataset || !meta?.data?.length) {{
-          return;
-        }}
-        const values = (dataset.data || []).map((value) => Number(value) || 0);
-        const total = values.reduce((sum, value) => sum + value, 0);
-        if (!total) {{
-          return;
-        }}
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.font = "700 11px Arial";
-        ctx.fillStyle = "#293537";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        meta.data.forEach((element, index) => {{
-          const value = values[index];
-          if (!value) {{
-            return;
-          }}
-          const share = (value / total) * 100;
-          if (share < 4) {{
-            return;
-          }}
-          const position = element.tooltipPosition();
-          const x = (position.x + chart.chartArea.left + chart.chartArea.right) / 3;
-          const y = (position.y + chart.chartArea.top + chart.chartArea.bottom) / 3;
-          ctx.fillText(`${{share.toFixed(1)}}%`, x, y);
-        }});
-        ctx.restore();
-      }},
-    }};
 
     function baseLineOptions(metricKey, yLabel, stacked = false) {{
       return {{
@@ -2874,9 +2386,22 @@ def build_html(dataset: dict[str, Any]) -> str:
       const metricKey = state.flowMetric;
       let records = filteredDimensionRecordsFor(state.deepCity, state.deepSegment, dimensionType);
       if (dimensionType === "developer") {{
-        const pieRows = developerPieRows(records, metricKey);
-        const pieLabels = pieRows.map((row) => row.dimension_value);
-        const pieData = pieRows.map((row) => row.value);
+        const labels = dimensionQuarterLabels(state.deepCity, state.deepSegment, dimensionType);
+        const latestQuarter = labels[labels.length - 1];
+        const latestRecords = records.filter((row) => row.quarter === latestQuarter);
+        const totals = new Map();
+        latestRecords.forEach((row) => {{
+          totals.set(row.dimension_value, (totals.get(row.dimension_value) || 0) + Number(row[metricKey] ?? 0));
+        }});
+        const ordered = [...totals.entries()].sort((a, b) => b[1] - a[1]);
+        const topFive = ordered.slice(0, 5);
+        const otherTotal = ordered.slice(5).reduce((sum, [, value]) => sum + value, 0);
+        const pieLabels = topFive.map(([label]) => label);
+        const pieData = topFive.map(([, value]) => value);
+        if (otherTotal > 0) {{
+          pieLabels.push("Other");
+          pieData.push(otherTotal);
+        }}
         buildOrReplaceChart(chartId, {{
           type: "pie",
           data: {{
@@ -2888,7 +2413,6 @@ def build_html(dataset: dict[str, Any]) -> str:
               borderWidth: 2,
             }}],
           }},
-          plugins: [piePercentageLabelPlugin],
           options: {{
             responsive: true,
             maintainAspectRatio: false,
@@ -2908,9 +2432,7 @@ def build_html(dataset: dict[str, Any]) -> str:
                 padding: 12,
                 callbacks: {{
                   label(context) {{
-                    const total = pieData.reduce((sum, value) => sum + Number(value || 0), 0);
-                    const share = total ? (Number(context.parsed || 0) / total) * 100 : null;
-                    return `${{context.label}}: ${{formatNumber(context.parsed, metricKind(metricKey))}} (${{formatNumber(share, "percent")}})`;
+                    return `${{context.label}}: ${{formatNumber(context.parsed, metricKind(metricKey))}}`;
                   }},
                 }},
               }},
@@ -3020,23 +2542,58 @@ def build_html(dataset: dict[str, Any]) -> str:
     }}
 
     function renderMapAnalytics(points, latestQuarter) {{
+      if (state.mapMode === "active_2026Q2") {{
+        const metrics = aggregateMapMetrics(points);
+        document.getElementById("mapSectionTitle").textContent = "Map of Active Projects";
+        document.getElementById("mapSectionNote").textContent = "Projects with sale status = current in 2026Q2, joined from Time Series to Project Identification for latitude and longitude.";
+        document.getElementById("mapKpi1Title").textContent = "Quarterly Sold Rate";
+        document.getElementById("mapKpi2Title").textContent = "Accumulated Sold Rate";
+        document.getElementById("mapChart1Title").textContent = "New Launched by Segment";
+        document.getElementById("mapChart2Title").textContent = "New Sold by Segment";
+        document.getElementById("mapQuarterlySoldRate").textContent = formatNumber(metrics.quarterlySoldRate, "percent");
+        document.getElementById("mapAccumulatedSoldRate").textContent = formatNumber(metrics.accumulatedSoldRate, "percent");
+        document.getElementById("mapQuarterlySoldRateNote").textContent = `Quarter / ${{latestQuarter}} / formula: new sold / available at beginning`;
+        document.getElementById("mapAccumulatedSoldRateNote").textContent = `Quarter / ${{latestQuarter}} / formula: current sold-out / (current supply + previous quarter available end)`;
+        document.getElementById("mapLaunchChartNote").textContent = `Quarter / ${{latestQuarter}} / stacked by market`;
+        document.getElementById("mapSoldChartNote").textContent = `Quarter / ${{latestQuarter}} / stacked by market`;
+
+        buildOrReplaceChart("chartMapLaunchSegment", {{
+          type: "bar",
+          data: groupedSegmentChartData(points, "new_launched"),
+          options: baseLineOptions("new_launched", "Units", true),
+        }});
+        buildOrReplaceChart("chartMapSoldSegment", {{
+          type: "bar",
+          data: groupedSegmentChartData(points, "new_sold"),
+          options: baseLineOptions("new_sold", "Units", true),
+        }});
+        return;
+      }}
+
+      const futureLabel = state.mapMode === "future_2027F" ? "2027F" : "2026F";
       const metrics = aggregateMapMetrics(points);
-      document.getElementById("mapQuarterlySoldRate").textContent = formatNumber(metrics.quarterlySoldRate, "percent");
-      document.getElementById("mapAccumulatedSoldRate").textContent = formatNumber(metrics.accumulatedSoldRate, "percent");
-      document.getElementById("mapQuarterlySoldRateNote").textContent = `Latest quarter / ${{latestQuarter}} / formula: new sold / available at beginning`;
-      document.getElementById("mapAccumulatedSoldRateNote").textContent = `Latest quarter / ${{latestQuarter}} / formula: current sold-out / (current supply + previous quarter available end)`;
+      document.getElementById("mapSectionTitle").textContent = `Project Map ${{futureLabel}}`;
+      document.getElementById("mapSectionNote").textContent = `Projects are filtered to the latest quarter and keep only rows with ${{futureLabel}} launch > 0. Sale status is not used as a filter.`;
+      document.getElementById("mapKpi1Title").textContent = `${{futureLabel}} Launch`;
+      document.getElementById("mapKpi2Title").textContent = "Future Projects";
+      document.getElementById("mapChart1Title").textContent = `${{futureLabel}} Launch by Segment`;
+      document.getElementById("mapChart2Title").textContent = `${{futureLabel}} Sold by Segment`;
+      document.getElementById("mapQuarterlySoldRate").textContent = formatNumber(metrics.totalFutureLaunch);
+      document.getElementById("mapAccumulatedSoldRate").textContent = formatNumber(metrics.projectCount);
+      document.getElementById("mapQuarterlySoldRateNote").textContent = `Latest quarter / ${{latestQuarter}} / total ${{futureLabel}} launch`;
+      document.getElementById("mapAccumulatedSoldRateNote").textContent = `Latest quarter / ${{latestQuarter}} / distinct mapped future projects`;
       document.getElementById("mapLaunchChartNote").textContent = `Latest quarter / ${{latestQuarter}} / stacked by market`;
       document.getElementById("mapSoldChartNote").textContent = `Latest quarter / ${{latestQuarter}} / stacked by market`;
 
       buildOrReplaceChart("chartMapLaunchSegment", {{
         type: "bar",
-        data: groupedSegmentChartData(points, "new_launched"),
-        options: baseLineOptions("new_launched", "Units", true),
+        data: groupedSegmentChartData(points, "future_launch_2026"),
+        options: baseLineOptions("future_launch_2026", "Units", true),
       }});
       buildOrReplaceChart("chartMapSoldSegment", {{
         type: "bar",
-        data: groupedSegmentChartData(points, "new_sold"),
-        options: baseLineOptions("new_sold", "Units", true),
+        data: groupedSegmentChartData(points, "future_sold_2026"),
+        options: baseLineOptions("future_sold_2026", "Units", true),
       }});
     }}
 
@@ -3050,18 +2607,10 @@ def build_html(dataset: dict[str, Any]) -> str:
         return;
       }}
 
-      const sortedPoints = [...points].sort((a, b) => {{
+        const sortedPoints = [...points].sort((a, b) => {{
         const key = state.projectSortKey;
-        const aValue = key === "quarterly_sold_rate"
-          ? quarterlySoldRateForPoint(a)
-          : key === "accumulated_sold_rate"
-            ? accumulatedSoldRateForPoint(a)
-            : a[key];
-        const bValue = key === "quarterly_sold_rate"
-          ? quarterlySoldRateForPoint(b)
-          : key === "accumulated_sold_rate"
-            ? accumulatedSoldRateForPoint(b)
-            : b[key];
+        const aValue = a[key];
+        const bValue = b[key];
         let comparison = 0;
         if (typeof aValue === "string" || typeof bValue === "string") {{
           comparison = String(aValue ?? "").localeCompare(String(bValue ?? ""));
@@ -3072,53 +2621,34 @@ def build_html(dataset: dict[str, Any]) -> str:
       }});
 
       sortedPoints.forEach((point) => {{
-        const quarterlySoldRate = quarterlySoldRateForPoint(point);
-        const accumulatedSoldRate = accumulatedSoldRateForPoint(point);
         const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><strong>${{point.project_name}}</strong></td>
-          <td>${{point.developer || "-"}}</td>
-          <td>${{point.city}}</td>
-          <td>${{point.segment}}</td>
-          <td>${{point.quarter}}</td>
-          <td>${{formatNumber(point.new_launched)}}</td>
-          <td>${{formatNumber(point.new_sold, "decimal")}}</td>
-          <td>${{formatNumber(point.current_supply)}}</td>
-          <td>${{formatNumber(point.available_begin)}}</td>
-          <td>${{formatNumber(quarterlySoldRate, "percent")}}</td>
-          <td>${{formatNumber(accumulatedSoldRate, "percent")}}</td>
-          <td>${{formatNumber(point.price, "currency")}}</td>
-        `;
+        tr.innerHTML = state.mapMode === "active_2026Q2"
+          ? `
+              <td><strong>${{point.project_name}}</strong></td>
+              <td>${{point.city}}</td>
+              <td>${{point.segment}}</td>
+              <td>${{point.quarter}}</td>
+              <td>${{formatNumber(point.new_launched)}}</td>
+              <td>${{formatNumber(point.new_sold, "decimal")}}</td>
+              <td>${{formatNumber(point.current_supply)}}</td>
+              <td>${{formatNumber(point.available_begin)}}</td>
+              <td>${{point.sale_status || "-"}}</td>
+              <td>${{formatNumber(point.price, "currency")}}</td>
+            `
+          : `
+              <td><strong>${{point.project_name}}</strong></td>
+              <td>${{point.city}}</td>
+              <td>${{point.segment}}</td>
+              <td>${{point.quarter}}</td>
+              <td>${{point.sale_status || "-"}}</td>
+              <td>${{formatNumber(point.future_launch_2026)}}</td>
+              <td>${{formatNumber(point.future_sold_2026)}}</td>
+              <td>${{point.grading || "-"}}</td>
+              <td>${{point.region || "-"}}</td>
+              <td>${{formatNumber(point.price, "currency")}}</td>
+            `;
         body.appendChild(tr);
       }});
-    }}
-
-    function renderFutureProjectTable(points) {{
-      const body = document.getElementById("futureProjectListBody");
-      body.innerHTML = "";
-      if (!points.length) {{
-        const tr = document.createElement("tr");
-        tr.innerHTML = '<td colspan="8">No future launch projects for the selected report quarter.</td>';
-        body.appendChild(tr);
-        return;
-      }}
-
-      [...points]
-        .sort((a, b) => Number(b.future_launch_total ?? 0) - Number(a.future_launch_total ?? 0))
-        .forEach((point) => {{
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td><strong>${{point.project_name}}</strong></td>
-            <td>${{point.developer || "-"}}</td>
-            <td>${{point.city}}</td>
-            <td>${{point.segment}}</td>
-            <td>${{point.quarter}}</td>
-            <td>${{formatNumber(point.future_launch_2026, "decimal")}}</td>
-            <td>${{formatNumber(point.future_launch_2027, "decimal")}}</td>
-            <td>${{formatNumber(point.future_launch_total, "decimal")}}</td>
-          `;
-          body.appendChild(tr);
-        }});
     }}
 
     function renderCityBoundaries() {{
@@ -3146,35 +2676,6 @@ def build_html(dataset: dict[str, Any]) -> str:
       }});
     }}
 
-    function renderFutureCityBoundaries() {{
-      futureCityBoundaryLayers.forEach((layer) => futureProjectMap.removeLayer(layer));
-      futureCityBoundaryLayers = [];
-
-      ["Hanoi", "HCMC"].forEach((city) => {{
-        const geometry = dashboardData.city_boundaries?.[city];
-        if (!geometry) {{
-          return;
-        }}
-        const layer = L.geoJSON(geometry, {{
-          style: {{
-            color: cityColors[city],
-            weight: 2.5,
-            opacity: 0.95,
-            fillColor: cityColors[city],
-            fillOpacity: 0.04,
-            dashArray: "8 6",
-          }},
-        }})
-          .bindTooltip(`${{city}} market boundary`, {{ sticky: true }})
-          .addTo(futureProjectMap);
-        futureCityBoundaryLayers.push(layer);
-      }});
-    }}
-
-    function gradingColorForPoint(point) {{
-      return gradingColors[point.grading] || "#A0A7B4";
-    }}
-
     function ensureMap() {{
       if (!projectMap) {{
         projectMap = L.map("projectMap", {{ zoomControl: true }}).setView([16.1, 106.2], 6);
@@ -3185,22 +2686,17 @@ def build_html(dataset: dict[str, Any]) -> str:
       }}
     }}
 
-    function ensureFutureMap() {{
-      if (!futureProjectMap) {{
-        futureProjectMap = L.map("futureProjectMap", {{ zoomControl: true }}).setView([16.1, 106.2], 6);
-        L.tileLayer("https://{{s}}.basemaps.cartocdn.com/light_nolabels/{{z}}/{{x}}/{{y}}{{r}}.png", {{
-          maxZoom: 18,
-          attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
-        }}).addTo(futureProjectMap);
-      }}
-    }}
-
     function renderMap() {{
       ensureMap();
       projectMarkers.forEach((marker) => projectMap.removeLayer(marker));
       projectMarkers = [];
       const latestQuarter = latestMapQuarter();
-      document.getElementById("mapNote").textContent = `${{state.mapCityFilter === "All" ? "All markets" : state.mapCityFilter}} / latest quarter / ${{latestQuarter}}`;
+      document.getElementById("projectMapTitle").textContent = mapModeLabel();
+      document.getElementById("projectListTitle").textContent = state.mapMode === "active_2026Q2" ? "Active Project List" : mapModeLabel();
+      document.getElementById("projectListNote").textContent = state.mapMode === "active_2026Q2"
+        ? "Mapped active projects in 2026Q2."
+        : `Mapped projects with ${{state.mapMode === "future_2027F" ? "2027F" : "2026F"}} launch > 0 in the latest quarter.`;
+      document.getElementById("mapNote").textContent = `${{state.mapCityFilter === "All" ? "All markets" : state.mapCityFilter}} / quarter / ${{latestQuarter}}`;
 
       const allPoints = latestMapPoints();
       renderMapAnalytics(allPoints, latestQuarter);
@@ -3221,27 +2717,29 @@ def build_html(dataset: dict[str, Any]) -> str:
           return;
         }}
         bounds.push([lat, lng]);
-        const marker = L.circleMarker([lat, lng], {{
-          radius: 8,
-          color: "#ffffff",
-          weight: 2,
-          fillColor: gradingColorForPoint(point),
-          fillOpacity: 0.92,
-        }}).addTo(projectMap);
-        const quarterlySoldRate = quarterlySoldRateForPoint(point);
-        const accumulatedSoldRate = accumulatedSoldRateForPoint(point);
-        marker.bindPopup(`
-          <strong>${{point.project_name}}</strong><br />
-          Developer: ${{point.developer || "-"}}<br />
-          Grading: ${{point.grading || "-"}}<br />
-          Quarter: ${{point.quarter}}<br />
-          New launched: ${{formatNumber(point.new_launched)}}<br />
-          New sold: ${{formatNumber(point.new_sold, "decimal")}}<br />
-          Current supply: ${{formatNumber(point.current_supply)}}<br />
-          Quarterly sold rate: ${{formatNumber(quarterlySoldRate, "percent")}}<br />
-          Accumulated sold rate: ${{formatNumber(accumulatedSoldRate, "percent")}}<br />
-          Price: ${{formatNumber(point.price, "currency")}}
-        `);
+        const marker = L.marker([lat, lng]).addTo(projectMap);
+        marker.bindPopup(
+          state.mapMode === "active_2026Q2"
+            ? `
+                <strong>${{point.project_name}}</strong><br />
+                Quarter: ${{point.quarter}}<br />
+                Sale status: ${{point.sale_status || "-"}}<br />
+                New launched: ${{formatNumber(point.new_launched)}}<br />
+                New sold: ${{formatNumber(point.new_sold, "decimal")}}<br />
+                Current supply: ${{formatNumber(point.current_supply)}}<br />
+                Price: ${{formatNumber(point.price, "currency")}}
+              `
+            : `
+                <strong>${{point.project_name}}</strong><br />
+                Quarter: ${{point.quarter}}<br />
+                Sale status: ${{point.sale_status || "-"}}<br />
+                ${{state.mapMode === "future_2027F" ? "2027F" : "2026F"}} launch: ${{formatNumber(point.future_launch_2026)}}<br />
+                ${{state.mapMode === "future_2027F" ? "2027F" : "2026F"}} sold: ${{formatNumber(point.future_sold_2026)}}<br />
+                Grading: ${{point.grading || "-"}}<br />
+                Region: ${{point.region || "-"}}<br />
+                Price: ${{formatNumber(point.price, "currency")}}
+              `
+        );
         projectMarkers.push(marker);
       }});
 
@@ -3249,57 +2747,6 @@ def build_html(dataset: dict[str, Any]) -> str:
         projectMap.setView(bounds[0], 12);
       }} else if (bounds.length > 1) {{
         projectMap.fitBounds(bounds, {{ padding: [24, 24] }});
-      }}
-    }}
-
-    function renderFutureMap() {{
-      ensureFutureMap();
-      futureProjectMarkers.forEach((marker) => futureProjectMap.removeLayer(marker));
-      futureProjectMarkers = [];
-      const selectedQuarter = state.endQuarter;
-      document.getElementById("futureMapNote").textContent = `${{state.futureMapCityFilter === "All" ? "All markets" : state.futureMapCityFilter}} / selected quarter / ${{selectedQuarter}}`;
-
-      const allPoints = futureMapPointsForQuarter(selectedQuarter);
-      renderFutureCityBoundaries();
-      const points = filteredFutureProjectPoints(allPoints);
-      renderFutureProjectTable(points);
-
-      if (!points.length) {{
-        futureProjectMap.setView([16.1, 106.2], 6);
-        return;
-      }}
-
-      const bounds = [];
-      points.forEach((point) => {{
-        const lat = Number(point.latitude);
-        const lng = Number(point.longitude);
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {{
-          return;
-        }}
-        bounds.push([lat, lng]);
-        const marker = L.circleMarker([lat, lng], {{
-          radius: 8,
-          color: "#ffffff",
-          weight: 2,
-          fillColor: gradingColorForPoint(point),
-          fillOpacity: 0.92,
-        }}).addTo(futureProjectMap);
-        marker.bindPopup(`
-          <strong>${{point.project_name}}</strong><br />
-          Developer: ${{point.developer || "-"}}<br />
-          Grading: ${{point.grading || "-"}}<br />
-          Quarter: ${{point.quarter}}<br />
-          2026 Launch: ${{formatNumber(point.future_launch_2026, "decimal")}}<br />
-          2027 Launch: ${{formatNumber(point.future_launch_2027, "decimal")}}<br />
-          Future Total: ${{formatNumber(point.future_launch_total, "decimal")}}
-        `);
-        futureProjectMarkers.push(marker);
-      }});
-
-      if (bounds.length === 1) {{
-        futureProjectMap.setView(bounds[0], 12);
-      }} else if (bounds.length > 1) {{
-        futureProjectMap.fitBounds(bounds, {{ padding: [24, 24] }});
       }}
     }}
 
@@ -3370,12 +2817,11 @@ def build_html(dataset: dict[str, Any]) -> str:
     }}
 
     function renderDashboard() {{
-      initializeExportButtons();
       renderFlowMetricButtons();
       renderDeepCityButtons();
       renderDeepSegmentButtons();
+      renderMapModeButtons();
       renderProjectCityFilterButtons();
-      renderFutureProjectCityFilterButtons();
       renderProjectTableHeaders();
       renderTimeframeControls();
       bindRefreshButton();
@@ -3383,7 +2829,6 @@ def build_html(dataset: dict[str, Any]) -> str:
       renderPriceCompare();
       renderDeepDive();
       renderMap();
-      renderFutureMap();
     }}
 
     renderDashboard();
