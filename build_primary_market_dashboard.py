@@ -39,6 +39,7 @@ WORKBOOK_CONFIGS = (
         "header_row": 2,
         "project_sheet": "2.Project identification",
         "project_sheet_header_row": 3,
+        "project_unit_col": "No.of Saleable Units",
         "project_id_col": "Project ID",
         "project_name_col": "Project Name",
         "quarter_col": "Quarter",
@@ -71,6 +72,7 @@ WORKBOOK_CONFIGS = (
         "header_row": 1,
         "project_sheet": "Project Identification",
         "project_sheet_header_row": 2,
+        "project_unit_col": "No. of Units",
         "project_id_col": "Project ID",
         "project_name_col": "Project Name",
         "quarter_col": "Quarter",
@@ -166,6 +168,19 @@ def normalize_dimension(raw_value: Any, dimension_type: str) -> str:
     return text
 
 
+def classify_price_segment(price_value: Any) -> str:
+    price = pd.to_numeric(price_value, errors="coerce")
+    if pd.isna(price) or price <= 0:
+        return "Unknown"
+    if price < 60_000_000:
+        return "Mid-end"
+    if price <= 120_000_000:
+        return "High-end"
+    if price <= 290_000_000:
+        return "Luxury"
+    return "Ultra Luxury"
+
+
 def load_project_identification(base_dir: Path, config: dict[str, Any]) -> pd.DataFrame:
     workbook_path = base_dir / config["folder"] / config["file"]
     dataframe = pd.read_excel(
@@ -181,6 +196,7 @@ def load_project_identification(base_dir: Path, config: dict[str, Any]) -> pd.Da
             "Latitude",
             "Longitude",
             "Current Developer (Main Entity)",
+            config["project_unit_col"],
         ]
     ].copy()
     dataframe["project_id"] = dataframe["Project ID"].map(normalize_project_id)
@@ -191,6 +207,9 @@ def load_project_identification(base_dir: Path, config: dict[str, Any]) -> pd.Da
     dataframe["project_developer"] = dataframe["Current Developer (Main Entity)"].map(
         lambda value: normalize_dimension(value, "developer")
     )
+    dataframe["project_total_units"] = pd.to_numeric(
+        dataframe[config["project_unit_col"]], errors="coerce"
+    )
     return dataframe[
         [
             "project_id",
@@ -198,6 +217,7 @@ def load_project_identification(base_dir: Path, config: dict[str, Any]) -> pd.Da
             "project_latitude",
             "project_longitude",
             "project_developer",
+            "project_total_units",
         ]
     ].drop_duplicates(subset=["project_id"])
 
@@ -263,6 +283,8 @@ def load_city_rows(base_dir: Path, config: dict[str, Any]) -> pd.DataFrame:
     ):
         dataframe[target_col] = pd.to_numeric(dataframe[source_col], errors="coerce")
 
+    dataframe["price_segment"] = dataframe["price"].map(classify_price_segment)
+
     if config["new_project_col"]:
         dataframe["new_project_marker"] = dataframe[config["new_project_col"]]
     else:
@@ -322,6 +344,7 @@ def load_future_map_rows(
         config["region_col"],
         config["status_col"],
         config["price_col"],
+        config["current_supply_col"],
         future_launch_col,
     ]
     if future_sold_col:
@@ -355,6 +378,9 @@ def load_future_map_rows(
         dataframe["future_sold_2026"] = pd.NA
     dataframe["future_label"] = future_label
     dataframe["price"] = pd.to_numeric(dataframe[config["price_col"]], errors="coerce")
+    dataframe["current_supply"] = pd.to_numeric(
+        dataframe[config["current_supply_col"]], errors="coerce"
+    )
     dataframe["is_actual_project"] = dataframe["project_id"].notna() & ~dataframe[
         "project_name"
     ].str.lower().str.startswith("total")
@@ -373,6 +399,23 @@ def load_future_map_rows(
             if project_mask.any():
                 dataframe.loc[project_mask, "project_latitude"] = coordinates["project_latitude"]
                 dataframe.loc[project_mask, "project_longitude"] = coordinates["project_longitude"]
+    dataframe["future_project_type"] = pd.NA
+    dataframe["future_h2_additional_launch"] = pd.NA
+    if future_label == "2026F":
+        new_mask = dataframe["current_supply"].isna() | (dataframe["current_supply"] == 0)
+        continuing_mask = ~new_mask
+        dataframe.loc[new_mask, "future_project_type"] = "New in 2026"
+        dataframe.loc[new_mask, "future_h2_additional_launch"] = dataframe.loc[
+            new_mask, "future_launch_2026"
+        ]
+        dataframe.loc[continuing_mask, "future_project_type"] = "Continuing in H2 2026"
+        dataframe.loc[continuing_mask, "future_h2_additional_launch"] = (
+            dataframe.loc[continuing_mask, "future_launch_2026"]
+            - dataframe.loc[continuing_mask, "current_supply"].fillna(0)
+        )
+    else:
+        dataframe["future_project_type"] = "2027F pipeline"
+        dataframe["future_h2_additional_launch"] = dataframe["future_launch_2026"]
     latest_rows = (
         dataframe.sort_values(["project_id", "quarter_sort"])
         .drop_duplicates(subset=["project_id"], keep="last")
@@ -652,6 +695,9 @@ def build_dataset() -> dict[str, Any]:
         dimension_breakdowns.extend(
             summarize_dimension_breakdown(city_frame, city_name, "Total", "developer")
         )
+        dimension_breakdowns.extend(
+            summarize_dimension_breakdown(city_frame, city_name, "Total", "price_segment")
+        )
         for segment in segments:
             scoped_frame = city_frame[city_frame["segment"] == segment].copy()
             dataset.extend(
@@ -670,6 +716,9 @@ def build_dataset() -> dict[str, Any]:
             dimension_breakdowns.extend(
                 summarize_dimension_breakdown(scoped_frame, city_name, segment, "developer")
             )
+            dimension_breakdowns.extend(
+                summarize_dimension_breakdown(scoped_frame, city_name, segment, "price_segment")
+            )
 
         point_rows = city_frame[
             city_frame["is_actual_project"]
@@ -683,6 +732,8 @@ def build_dataset() -> dict[str, Any]:
                 "quarter_sort",
                 "project_id",
                 "project_name",
+                "project_developer",
+                "project_total_units",
                 "project_latitude",
                 "project_longitude",
                 "price",
@@ -699,6 +750,8 @@ def build_dataset() -> dict[str, Any]:
             columns={
                 "project_latitude": "latitude",
                 "project_longitude": "longitude",
+                "project_developer": "developer",
+                "project_total_units": "total_units",
             }
         )
         map_points.extend(
@@ -721,10 +774,14 @@ def build_dataset() -> dict[str, Any]:
                     "project_id",
                     "project_name",
                     "project_developer",
+                    "project_total_units",
                     "project_latitude",
                     "project_longitude",
+                    "current_supply",
                     "future_launch_2026",
                     "future_sold_2026",
+                    "future_project_type",
+                    "future_h2_additional_launch",
                     "price",
                     "sale_status",
                     "future_label",
@@ -735,6 +792,7 @@ def build_dataset() -> dict[str, Any]:
                     "project_latitude": "latitude",
                     "project_longitude": "longitude",
                     "project_developer": "developer",
+                    "project_total_units": "total_units",
                 }
             )
             future_map_sets[future_label].extend(
@@ -1041,8 +1099,21 @@ def build_html(dataset: dict[str, Any]) -> str:
       display: flex;
       justify-content: space-between;
       gap: 12px;
-      align-items: baseline;
+      align-items: flex-start;
       margin-bottom: 12px;
+    }}
+    .chart-head-main {{
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }}
+    .chart-actions {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+      flex: 0 0 auto;
     }}
     .chart-title {{
       margin: 0;
@@ -1052,6 +1123,23 @@ def build_html(dataset: dict[str, Any]) -> str:
     .chart-note {{
       color: var(--muted);
       font-size: 13px;
+    }}
+    .csv-button {{
+      border: 1px solid rgba(50, 129, 245, 0.28);
+      background: rgba(50, 129, 245, 0.1);
+      color: var(--blue);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }}
+    .csv-button:hover {{
+      background: rgba(50, 129, 245, 0.16);
+      transform: translateY(-1px);
     }}
     .canvas-wrap {{
       height: 320px;
@@ -1104,8 +1192,15 @@ def build_html(dataset: dict[str, Any]) -> str:
       padding: 18px 18px 16px;
       min-height: 146px;
     }}
+    .kpi-head {{
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }}
     .map-kpi-card h3 {{
-      margin: 0 0 10px;
+      margin: 0;
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.1em;
@@ -1296,22 +1391,26 @@ def build_html(dataset: dict[str, Any]) -> str:
     <section class="section-block">
       <div class="section-head">
         <div>
-          <h2>Top-Line Comparison</h2>
+          <h2>1.1 Comparison: New Launched</h2>
           <div class="section-note">One chart, two lines, direct comparison between total Hanoi and total HCMC by quarter.</div>
         </div>
       </div>
       <div class="compare-grid">
         <article class="panel chart-card">
           <div class="chart-head">
-            <h3 class="chart-title" id="flowCompareTitle">Flow Comparison</h3>
-            <span class="chart-note">Total market view</span>
+            <div class="chart-head-main">
+              <h3 class="chart-title" id="flowCompareTitle">Flow Comparison</h3>
+              <span class="chart-note">Total market view</span>
+            </div>
           </div>
           <div class="canvas-wrap"><canvas id="chartFlowCompare"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-kind="latest-snapshot">
           <div class="chart-head">
-            <h3 class="chart-title">Latest Quarter Snapshot</h3>
-            <span class="chart-note">Fast read on current quarter totals</span>
+            <div class="chart-head-main">
+              <h3 class="chart-title">Latest Quarter Snapshot</h3>
+              <span class="chart-note">Fast read on current quarter totals</span>
+            </div>
           </div>
           <div class="legend-list" id="latestCompareList"></div>
         </article>
@@ -1321,29 +1420,35 @@ def build_html(dataset: dict[str, Any]) -> str:
     <section class="section-block">
       <div class="section-head">
         <div>
-          <h2>Province / Submarket Breakdown</h2>
+          <h2>1.2 Comparison: New Launched by region</h2>
           <div class="section-note">Deeper view of launched and sold volume inside each market. Hanoi splits into Central Hanoi and Van Giang HY. HCMC splits into Central HCMC, Binh Duong, and BR-VT.</div>
         </div>
       </div>
       <div class="price-grid">
         <article class="panel chart-card">
           <div class="chart-head">
-            <h3 class="chart-title">Hanoi Breakdown</h3>
-            <span class="chart-note" id="hanoiBreakdownNote"></span>
+            <div class="chart-head-main">
+              <h3 class="chart-title">Hanoi Breakdown</h3>
+              <span class="chart-note" id="hanoiBreakdownNote"></span>
+            </div>
           </div>
           <div class="canvas-wrap small"><canvas id="chartHanoiBreakdown"></canvas></div>
         </article>
         <article class="panel chart-card">
           <div class="chart-head">
-            <h3 class="chart-title">HCMC Breakdown</h3>
-            <span class="chart-note" id="hcmcBreakdownNote"></span>
+            <div class="chart-head-main">
+              <h3 class="chart-title">HCMC Breakdown</h3>
+              <span class="chart-note" id="hcmcBreakdownNote"></span>
+            </div>
           </div>
           <div class="canvas-wrap small"><canvas id="chartHcmcBreakdown"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-kind="table">
           <div class="chart-head">
-            <h3 class="chart-title">Segment Mix Table</h3>
-            <span class="chart-note">Latest quarter by selected flow metric</span>
+            <div class="chart-head-main">
+              <h3 class="chart-title">Segment Mix Table</h3>
+              <span class="chart-note">Latest quarter by selected flow metric</span>
+            </div>
           </div>
           <div class="table-wrap">
             <table>
@@ -1365,45 +1470,28 @@ def build_html(dataset: dict[str, Any]) -> str:
     <section class="section-block">
       <div class="section-head">
         <div>
-          <h2>Total Market Price Comparison</h2>
-          <div class="section-note">Direct comparisons between Hanoi total and HCMC total across price definitions plus quarterly and cumulative sold rate.</div>
+          <h2>1.3 Comparison: Price</h2>
+          <div class="section-note">Weighted price by current supply for each submarket inside Hanoi and HCMC.</div>
         </div>
       </div>
       <div class="price-grid">
         <article class="panel chart-card">
           <div class="chart-head">
-            <h3 class="chart-title">Weighted Price by Current Supply</h3>
-            <span class="chart-note">Total Hanoi vs total HCMC</span>
+            <div class="chart-head-main">
+              <h3 class="chart-title">Hanoi Price Trend</h3>
+              <span class="chart-note" id="hanoiPriceTrendNote"></span>
+            </div>
           </div>
-          <div class="canvas-wrap small"><canvas id="chartPriceCurrentCompare"></canvas></div>
+          <div class="canvas-wrap small"><canvas id="chartHanoiPriceTrend"></canvas></div>
         </article>
         <article class="panel chart-card">
           <div class="chart-head">
-            <h3 class="chart-title">Weighted Price by Available Supply</h3>
-            <span class="chart-note">Total Hanoi vs total HCMC</span>
+            <div class="chart-head-main">
+              <h3 class="chart-title">HCMC Price Trend</h3>
+              <span class="chart-note" id="hcmcPriceTrendNote"></span>
+            </div>
           </div>
-          <div class="canvas-wrap small"><canvas id="chartPriceAvailableCompare"></canvas></div>
-        </article>
-        <article class="panel chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">Average Price of New Projects</h3>
-            <span class="chart-note">First-launch project cohorts</span>
-          </div>
-          <div class="canvas-wrap small"><canvas id="chartNewProjectCompare"></canvas></div>
-        </article>
-        <article class="panel chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">Quarterly Sold Rate</h3>
-            <span class="chart-note">New sold / current for sale at the beginning</span>
-          </div>
-          <div class="canvas-wrap small"><canvas id="chartSoldRateQuarterlyCompare"></canvas></div>
-        </article>
-        <article class="panel chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">Cumulative Sold Rate</h3>
-            <span class="chart-note">Current sold-out / (current supply + previous quarter available end)</span>
-          </div>
-          <div class="canvas-wrap small"><canvas id="chartSoldRateCumulativeCompare"></canvas></div>
+          <div class="canvas-wrap small"><canvas id="chartHcmcPriceTrend"></canvas></div>
         </article>
       </div>
     </section>
@@ -1411,96 +1499,47 @@ def build_html(dataset: dict[str, Any]) -> str:
     <section class="section-block">
       <div class="section-head">
         <div>
-          <h2>Deep Dive by Segment</h2>
-          <div class="section-note">Use the controls above to inspect a single segment over time. This is where you can read deeper into price, supply-weighted price, and new project formation.</div>
+          <h2>1.4 Comparison: Price Segment</h2>
+          <div class="section-note">Breakdown by current price in the time-series sheet: Mid-end &lt; 60m VND/m2, High-end 60-120m, Luxury 120-290m, Ultra Luxury &gt; 290m.</div>
         </div>
       </div>
-      <div class="deep-grid">
+      <div class="price-grid">
         <article class="panel chart-card">
           <div class="chart-head">
-            <h3 class="chart-title">Segment Weighted Price by Current Supply</h3>
-            <span class="chart-note" id="deepCurrentNote"></span>
+            <div class="chart-head-main">
+              <h3 class="chart-title">Hanoi by Price Segment</h3>
+              <span class="chart-note" id="hanoiPriceSegmentNote"></span>
+            </div>
           </div>
-          <div class="canvas-wrap small"><canvas id="chartDeepCurrentPrice"></canvas></div>
+          <div class="canvas-wrap small"><canvas id="chartHanoiPriceSegment"></canvas></div>
         </article>
         <article class="panel chart-card">
           <div class="chart-head">
-            <h3 class="chart-title">Segment Weighted Price by Available Supply</h3>
-            <span class="chart-note" id="deepAvailableNote"></span>
+            <div class="chart-head-main">
+              <h3 class="chart-title">HCMC by Price Segment</h3>
+              <span class="chart-note" id="hcmcPriceSegmentNote"></span>
+            </div>
           </div>
-          <div class="canvas-wrap small"><canvas id="chartDeepAvailablePrice"></canvas></div>
+          <div class="canvas-wrap small"><canvas id="chartHcmcPriceSegment"></canvas></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-kind="table">
           <div class="chart-head">
-            <h3 class="chart-title">Segment New Project Avg Price</h3>
-            <span class="chart-note" id="deepNewProjectNote"></span>
-          </div>
-          <div class="canvas-wrap small"><canvas id="chartDeepNewProjectPrice"></canvas></div>
-        </article>
-        <article class="panel chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">Segment New Projects</h3>
-            <span class="chart-note">First positive launch quarter count</span>
-          </div>
-          <div class="canvas-wrap small"><canvas id="chartDeepNewProjects"></canvas></div>
-        </article>
-        <article class="panel chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">Segment Sold Rate</h3>
-            <span class="chart-note" id="deepSoldRateQuarterlyNote"></span>
-          </div>
-          <div class="canvas-wrap small"><canvas id="chartDeepSoldRateQuarterly"></canvas></div>
-        </article>
-        <article class="panel chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">Segment Cumulative Sold Rate</h3>
-            <span class="chart-note" id="deepSoldRateCumulativeNote"></span>
-          </div>
-          <div class="canvas-wrap small"><canvas id="chartDeepSoldRateCumulative"></canvas></div>
-        </article>
-        <article class="panel chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">Flow Mix by Grading</h3>
-            <span class="chart-note" id="deepGradingMixNote"></span>
-          </div>
-          <div class="canvas-wrap small"><canvas id="chartDeepGradingMix"></canvas></div>
-        </article>
-        <article class="panel chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">Flow Mix by Region</h3>
-            <span class="chart-note" id="deepRegionMixNote"></span>
-          </div>
-          <div class="canvas-wrap small"><canvas id="chartDeepRegionMix"></canvas></div>
-        </article>
-        <article class="panel chart-card">
-          <div class="chart-head">
-            <h3 class="chart-title">Flow Mix by Developer</h3>
-            <span class="chart-note" id="deepDeveloperMixNote"></span>
-          </div>
-          <div class="canvas-wrap small"><canvas id="chartDeepDeveloperMix"></canvas></div>
-        </article>
-        <article class="panel table-card">
-          <div class="chart-head">
-            <h3 class="chart-title">Deep Dive Quarterly Table</h3>
-            <span class="chart-note">Selected market and segment</span>
+            <div class="chart-head-main">
+              <h3 class="chart-title">Price Segment Mix Table</h3>
+              <span class="chart-note">Latest quarter by selected flow metric</span>
+            </div>
           </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Quarter</th>
-                  <th>New launched</th>
-                  <th>New sold</th>
-                  <th>Price current</th>
-                  <th>Price available</th>
-                  <th>New project avg price</th>
-                  <th>Quarterly sold rate</th>
-                  <th>Cumulative sold rate</th>
-                  <th>Active projects</th>
-                  <th>New projects</th>
+                  <th>Market</th>
+                  <th>Price segment</th>
+                  <th>Latest quarter</th>
+                  <th id="priceSegmentMixMetricHead">Value</th>
                 </tr>
               </thead>
-              <tbody id="deepTableBody"></tbody>
+              <tbody id="priceSegmentMixBody"></tbody>
             </table>
           </div>
         </article>
@@ -1510,20 +1549,183 @@ def build_html(dataset: dict[str, Any]) -> str:
     <section class="section-block">
       <div class="section-head">
         <div>
-          <h2 id="mapSectionTitle">Map of Active Projects</h2>
+          <h2>1.5 Comparison: Weighted Price</h2>
+          <div class="section-note">Direct comparisons between Hanoi total and HCMC total across the main price definitions.</div>
+        </div>
+      </div>
+      <div class="price-grid">
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Weighted Price by Current Supply</h3>
+              <span class="chart-note">Total Hanoi vs total HCMC</span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartPriceCurrentCompare"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Weighted Price by Available Supply</h3>
+              <span class="chart-note">Total Hanoi vs total HCMC</span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartPriceAvailableCompare"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Average Price of New Projects</h3>
+              <span class="chart-note">First-launch project cohorts</span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartNewProjectCompare"></canvas></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <div class="section-head">
+        <div>
+          <h2>1.6 Comparison: Sold Rate</h2>
+          <div class="section-note">Quarterly and cumulative sold rate comparison between total Hanoi and total HCMC.</div>
+        </div>
+      </div>
+      <div class="price-grid">
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Quarterly Sold Rate</h3>
+              <span class="chart-note">New sold / current for sale at the beginning</span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartSoldRateQuarterlyCompare"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Cumulative Sold Rate</h3>
+              <span class="chart-note">Current sold-out / (current supply + previous quarter available end)</span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartSoldRateCumulativeCompare"></canvas></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <div class="section-head">
+        <div>
+          <h2 id="deepDiveTitle">2. Deep Dive</h2>
+          <div class="section-note">Use the controls above to inspect a single segment over time. This is where you can read deeper into price, supply-weighted price, and new project formation.</div>
+        </div>
+      </div>
+      <div class="deep-grid">
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Segment Weighted Price by Current Supply</h3>
+              <span class="chart-note" id="deepCurrentNote"></span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartDeepCurrentPrice"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Segment Weighted Price by Available Supply</h3>
+              <span class="chart-note" id="deepAvailableNote"></span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartDeepAvailablePrice"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Segment New Project Avg Price</h3>
+              <span class="chart-note" id="deepNewProjectNote"></span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartDeepNewProjectPrice"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Segment New Projects</h3>
+              <span class="chart-note">First positive launch quarter count</span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartDeepNewProjects"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Segment Sold Rate</h3>
+              <span class="chart-note" id="deepSoldRateQuarterlyNote"></span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartDeepSoldRateQuarterly"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Segment Cumulative Sold Rate</h3>
+              <span class="chart-note" id="deepSoldRateCumulativeNote"></span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartDeepSoldRateCumulative"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Flow Mix by Grading</h3>
+              <span class="chart-note" id="deepGradingMixNote"></span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartDeepGradingMix"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Flow Mix by Region</h3>
+              <span class="chart-note" id="deepRegionMixNote"></span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartDeepRegionMix"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <div class="chart-head">
+            <div class="chart-head-main">
+              <h3 class="chart-title">Flow Mix by Developer</h3>
+              <span class="chart-note" id="deepDeveloperMixNote"></span>
+            </div>
+          </div>
+          <div class="canvas-wrap small"><canvas id="chartDeepDeveloperMix"></canvas></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <div class="section-head">
+        <div>
+          <h2 id="mapSectionTitle">3. Detail Project: Current &amp; Future</h2>
           <div class="section-note" id="mapSectionNote">Projects are joined from Time Series to Project Identification for latitude and longitude.</div>
         </div>
       </div>
       <div class="button-row" id="mapModeButtons"></div>
       <div class="map-analytics">
         <div class="map-metric-grid" id="mapMetricGrid">
-          <article class="panel map-kpi-card">
-            <h3 id="mapKpi1Title">Quarterly Sold Rate</h3>
+          <article class="panel map-kpi-card" data-export-kind="kpi">
+            <div class="kpi-head">
+              <h3 id="mapKpi1Title">Quarterly Sold Rate</h3>
+            </div>
             <strong id="mapQuarterlySoldRate">-</strong>
             <p id="mapQuarterlySoldRateNote">Latest quarter aggregate for mapped active projects.</p>
           </article>
-          <article class="panel map-kpi-card">
-            <h3 id="mapKpi2Title">Accumulated Sold Rate</h3>
+          <article class="panel map-kpi-card" data-export-kind="kpi">
+            <div class="kpi-head">
+              <h3 id="mapKpi2Title">Accumulated Sold Rate</h3>
+            </div>
             <strong id="mapAccumulatedSoldRate">-</strong>
             <p id="mapAccumulatedSoldRateNote">Current sold-out divided by current supply plus previous quarter available end.</p>
           </article>
@@ -1531,32 +1733,40 @@ def build_html(dataset: dict[str, Any]) -> str:
         <div class="map-chart-grid">
           <article class="panel chart-card">
             <div class="chart-head">
-              <h3 class="chart-title" id="mapChart1Title">New Launched by Segment</h3>
-              <span class="chart-note" id="mapLaunchChartNote"></span>
+              <div class="chart-head-main">
+                <h3 class="chart-title" id="mapChart1Title">New Launched by Segment</h3>
+                <span class="chart-note" id="mapLaunchChartNote"></span>
+              </div>
             </div>
             <div class="canvas-wrap small"><canvas id="chartMapLaunchSegment"></canvas></div>
           </article>
           <article class="panel chart-card">
             <div class="chart-head">
-              <h3 class="chart-title" id="mapChart2Title">New Sold by Segment</h3>
-              <span class="chart-note" id="mapSoldChartNote"></span>
+              <div class="chart-head-main">
+                <h3 class="chart-title" id="mapChart2Title">New Sold by Segment</h3>
+                <span class="chart-note" id="mapSoldChartNote"></span>
+              </div>
             </div>
             <div class="canvas-wrap small"><canvas id="chartMapSoldSegment"></canvas></div>
           </article>
         </div>
       </div>
       <div class="map-shell">
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-kind="map-points">
           <div class="chart-head">
-            <h3 class="chart-title" id="projectMapTitle">Project Map</h3>
-            <span class="chart-note" id="mapNote"></span>
+            <div class="chart-head-main">
+              <h3 class="chart-title" id="projectMapTitle">Project Map</h3>
+              <span class="chart-note" id="mapNote"></span>
+            </div>
           </div>
           <div id="projectMap"></div>
         </article>
-        <article class="panel chart-card">
+        <article class="panel chart-card" data-export-kind="table">
           <div class="chart-head">
-            <h3 class="chart-title" id="projectListTitle">Project List</h3>
-            <span class="chart-note" id="projectListNote">Mapped projects in the selected map mode.</span>
+            <div class="chart-head-main">
+              <h3 class="chart-title" id="projectListTitle">Project List</h3>
+              <span class="chart-note" id="projectListNote">Mapped projects in the selected map mode.</span>
+            </div>
           </div>
           <div class="project-filter-row" id="projectCityFilterButtons"></div>
           <div class="project-table-wrap">
@@ -1571,37 +1781,6 @@ def build_html(dataset: dict[str, Any]) -> str:
       </div>
     </section>
 
-    <section class="panel table-card">
-      <div class="chart-head">
-        <h3 class="chart-title">Quarterly Compare Table</h3>
-        <span class="chart-note">Total Hanoi and total HCMC side by side</span>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Quarter</th>
-              <th>Hanoi launched</th>
-              <th>HCMC launched</th>
-              <th>Hanoi sold</th>
-              <th>HCMC sold</th>
-              <th>Hanoi quarterly sold rate</th>
-              <th>HCMC quarterly sold rate</th>
-              <th>Hanoi cumulative sold rate</th>
-              <th>HCMC cumulative sold rate</th>
-              <th>Hanoi active projects</th>
-              <th>HCMC active projects</th>
-              <th>Hanoi price current</th>
-              <th>HCMC price current</th>
-            </tr>
-          </thead>
-          <tbody id="compareTableBody"></tbody>
-        </table>
-      </div>
-      <div class="footnote">
-        Rules in use: only rows with sale status = current are included. Launch and sold rollups still keep aggregate total rows where the source workbook only provides total values. Weighted price excludes rows where price &lt;= 0 or the relevant weight is &lt;= 0. Quarterly sold rate = new sold / current for sale at the beginning. Cumulative sold rate = current sold-out / (current supply + previous quarter available end).
-      </div>
-    </section>
   </div>
 
   <script>
@@ -1613,7 +1792,7 @@ def build_html(dataset: dict[str, Any]) -> str:
       deepSegment: "Total",
       mapMode: "active_2026Q2",
       mapCityFilter: "All",
-      startQuarter: dashboardData.quarters.find((quarter) => quarterSort(quarter) >= quarterSort("2022Q1")) || dashboardData.quarters[0],
+      startQuarter: dashboardData.quarters.find((quarter) => quarterSort(quarter) >= quarterSort("2023Q1")) || dashboardData.quarters[0],
       endQuarter: dashboardData.quarters[dashboardData.quarters.length - 1],
       projectSortKey: "current_supply",
       projectSortDirection: "desc",
@@ -1639,6 +1818,13 @@ def build_html(dataset: dict[str, Any]) -> str:
       "Affordable": "#9FD356",
       "Mid-end": "#3281F5",
       "Premium": "#68B794",
+      "Luxury": "#B59525",
+      "Ultra Luxury": "#DC707A",
+      "Unknown": "#A0A7B4",
+    }};
+    const priceSegmentColors = {{
+      "Mid-end": "#3281F5",
+      "High-end": "#68B794",
       "Luxury": "#B59525",
       "Ultra Luxury": "#DC707A",
       "Unknown": "#A0A7B4",
@@ -2013,7 +2199,9 @@ def build_html(dataset: dict[str, Any]) -> str:
             ["segment", "Segment"],
             ["quarter", "Quarter"],
             ["sale_status", "Sale status"],
+            ["future_project_type", "Type"],
             ["future_launch_2026", `${{state.mapMode === "future_2027F" ? "2027F" : "2026F"}} launch`],
+            ["future_h2_additional_launch", state.mapMode === "future_2027F" ? "2027F pipeline" : "H2 2026 add"],
             ["future_sold_2026", `${{state.mapMode === "future_2027F" ? "2027F" : "2026F"}} sold`],
             ["grading", "Grading"],
             ["region", "Region"],
@@ -2032,7 +2220,7 @@ def build_html(dataset: dict[str, Any]) -> str:
             state.projectSortDirection = state.projectSortDirection === "asc" ? "desc" : "asc";
           }} else {{
             state.projectSortKey = key;
-            state.projectSortDirection = ["project_name", "city", "segment", "quarter", "sale_status", "grading", "region"].includes(key) ? "asc" : "desc";
+            state.projectSortDirection = ["project_name", "city", "segment", "quarter", "sale_status", "grading", "region", "future_project_type"].includes(key) ? "asc" : "desc";
           }}
           renderProjectTableHeaders();
           renderMap();
@@ -2151,6 +2339,9 @@ def build_html(dataset: dict[str, Any]) -> str:
       if (dimensionType === "grading") {{
         return gradingColors[label] || "#A0A7B4";
       }}
+      if (dimensionType === "price_segment") {{
+        return priceSegmentColors[label] || "#A0A7B4";
+      }}
       if (dimensionType === "developer") {{
         const index = [...label].reduce((sum, char) => sum + char.charCodeAt(0), 0) % developerPalette.length;
         return developerPalette[index];
@@ -2160,7 +2351,11 @@ def build_html(dataset: dict[str, Any]) -> str:
 
     function dimensionOrder(dimensionType, labels, records = []) {{
       const gradingOrder = ["Affordable", "Mid-end", "Premium", "Luxury", "Ultra Luxury", "Unknown"];
+      const priceSegmentOrder = ["Mid-end", "High-end", "Luxury", "Ultra Luxury", "Unknown"];
       const regionOrder = ["CBD", "Core CBD", "East", "North", "South", "West", "Khu Dong", "Khu Tay", "Khu Nam", "Khu Bac", "Khu TT", "Hung Yen", "Unknown"];
+      if (dimensionType === "price_segment") {{
+        return priceSegmentOrder.filter((label) => labels.includes(label));
+      }}
       if (dimensionType === "developer") {{
         const totals = new Map();
         records.forEach((row) => {{
@@ -2227,7 +2422,7 @@ def build_html(dataset: dict[str, Any]) -> str:
       }});
     }}
 
-    function renderBreakdownChart(chartId, city, segments) {{
+    function renderGeographyBreakdownChart(chartId, city, segments) {{
       const labels = unionQuarterLabels(segments.map((segment) => [city, segment]));
       const metricKey = state.flowMetric;
       const datasets = segments.map((segment) => {{
@@ -2237,6 +2432,66 @@ def build_html(dataset: dict[str, Any]) -> str:
           backgroundColor: segmentColors[segment] || "#999999",
           borderColor: segmentColors[segment] || "#999999",
           borderWidth: 1,
+          borderRadius: 8,
+          maxBarThickness: 34,
+        }};
+      }});
+      buildOrReplaceChart(chartId, {{
+        type: "bar",
+        data: {{ labels, datasets }},
+        options: baseLineOptions(
+          metricKey,
+          metricKind(metricKey) === "percent" ? "%" : "Units",
+          true
+        ),
+      }});
+    }}
+
+    function renderGeographyPriceTrendChart(chartId, city, segments) {{
+      const labels = unionQuarterLabels(segments.map((segment) => [city, segment]));
+      const metricKey = "weighted_price_current_supply";
+      const datasets = segments.map((segment) => {{
+        return {{
+          label: segment,
+          data: toSeriesByQuarter(city, segment, labels, metricKey),
+          borderColor: segmentColors[segment] || "#999999",
+          backgroundColor: segmentColors[segment] || "#999999",
+          pointRadius: 2.5,
+          pointHoverRadius: 4,
+          borderWidth: 3,
+          tension: 0.22,
+        }};
+      }});
+      buildOrReplaceChart(chartId, {{
+        type: "line",
+        data: {{ labels, datasets }},
+        options: baseLineOptions(metricKey, "VND"),
+      }});
+    }}
+
+    function renderPriceSegmentBreakdownChart(chartId, city) {{
+      const labels = dimensionQuarterLabels(city, "Total", "price_segment");
+      const records = filteredDimensionRecordsFor(city, "Total", "price_segment");
+      const priceSegments = dimensionOrder(
+        "price_segment",
+        [...new Set(records.map((row) => row.dimension_value))],
+        records
+      ).filter((label) => label !== "Unknown");
+      const metricKey = state.flowMetric;
+      const datasets = priceSegments.map((segment) => {{
+        const recordMap = new Map(
+          records
+            .filter((row) => row.dimension_value === segment)
+            .map((row) => [row.quarter, row])
+        );
+        return {{
+          label: segment,
+          data: labels.map((quarter) => recordMap.get(quarter)?.[metricKey] ?? 0),
+          backgroundColor: priceSegmentColors[segment] || "#999999",
+          borderColor: priceSegmentColors[segment] || "#999999",
+          borderWidth: 1,
+          borderRadius: 8,
+          maxBarThickness: 34,
         }};
       }});
       buildOrReplaceChart(chartId, {{
@@ -2253,8 +2508,8 @@ def build_html(dataset: dict[str, Any]) -> str:
     function renderBreakdownSection() {{
       document.getElementById("hanoiBreakdownNote").textContent = metricLabels[state.flowMetric];
       document.getElementById("hcmcBreakdownNote").textContent = metricLabels[state.flowMetric];
-      renderBreakdownChart("chartHanoiBreakdown", "Hanoi", ["Central Hanoi", "Van Giang HY"]);
-      renderBreakdownChart("chartHcmcBreakdown", "HCMC", ["Central HCMC", "Binh Duong", "BR-VT"]);
+      renderGeographyBreakdownChart("chartHanoiBreakdown", "Hanoi", ["Central Hanoi", "Van Giang HY"]);
+      renderGeographyBreakdownChart("chartHcmcBreakdown", "HCMC", ["Central HCMC", "Binh Duong", "BR-VT"]);
 
       const body = document.getElementById("segmentMixBody");
       body.innerHTML = "";
@@ -2262,6 +2517,46 @@ def build_html(dataset: dict[str, Any]) -> str:
       [["Hanoi", ["Central Hanoi", "Van Giang HY"]], ["HCMC", ["Central HCMC", "Binh Duong", "BR-VT"]]].forEach(([city, segments]) => {{
         segments.forEach((segment) => {{
           const latest = latestRecord(city, segment);
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${{city}}</td>
+            <td>${{segment}}</td>
+            <td>${{latest?.quarter ?? "-"}}</td>
+            <td>${{formatNumber(latest?.[state.flowMetric], metricKind(state.flowMetric))}}</td>
+          `;
+          body.appendChild(tr);
+        }});
+      }});
+    }}
+
+    function renderPriceTrendSection() {{
+      document.getElementById("hanoiPriceTrendNote").textContent = "Weighted price by current supply";
+      document.getElementById("hcmcPriceTrendNote").textContent = "Weighted price by current supply";
+      renderGeographyPriceTrendChart("chartHanoiPriceTrend", "Hanoi", ["Central Hanoi", "Van Giang HY"]);
+      renderGeographyPriceTrendChart("chartHcmcPriceTrend", "HCMC", ["Central HCMC", "Binh Duong", "BR-VT"]);
+    }}
+
+    function renderPriceSegmentBreakdownSection() {{
+      document.getElementById("hanoiPriceSegmentNote").textContent = metricLabels[state.flowMetric];
+      document.getElementById("hcmcPriceSegmentNote").textContent = metricLabels[state.flowMetric];
+      renderPriceSegmentBreakdownChart("chartHanoiPriceSegment", "Hanoi");
+      renderPriceSegmentBreakdownChart("chartHcmcPriceSegment", "HCMC");
+
+      const body = document.getElementById("priceSegmentMixBody");
+      body.innerHTML = "";
+      document.getElementById("priceSegmentMixMetricHead").textContent = metricLabels[state.flowMetric];
+      ["Hanoi", "HCMC"].forEach((city) => {{
+        const records = filteredDimensionRecordsFor(city, "Total", "price_segment");
+        const priceSegments = dimensionOrder(
+          "price_segment",
+          [...new Set(records.map((row) => row.dimension_value))],
+          records
+        ).filter((label) => label !== "Unknown");
+        priceSegments.forEach((segment) => {{
+          const latest = records
+            .filter((row) => row.dimension_value === segment)
+            .sort((a, b) => a.quarter_sort - b.quarter_sort)
+            .at(-1);
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${{city}}</td>
@@ -2471,6 +2766,7 @@ def build_html(dataset: dict[str, Any]) -> str:
     }}
 
     function renderDeepDive() {{
+      document.getElementById("deepDiveTitle").textContent = `2. Deep Dive: ${{state.deepCity}} / ${{state.deepSegment}} / Flow: ${{metricLabels[state.flowMetric]}}`;
       document.getElementById("deepCurrentNote").textContent = `${{state.deepCity}} / ${{state.deepSegment}}`;
       document.getElementById("deepAvailableNote").textContent = `${{state.deepCity}} / ${{state.deepSegment}}`;
       document.getElementById("deepNewProjectNote").textContent = `${{state.deepCity}} / ${{state.deepSegment}}`;
@@ -2490,61 +2786,11 @@ def build_html(dataset: dict[str, Any]) -> str:
       renderDeepDimensionChart("chartDeepRegionMix", "region");
       renderDeepDimensionChart("chartDeepDeveloperMix", "developer");
 
-      const body = document.getElementById("deepTableBody");
-      body.innerHTML = "";
-      const rows = [...recordsFor(state.deepCity, state.deepSegment)].reverse();
-      const filteredRows = rows.filter((row) => isQuarterInRange(row.quarter));
-      filteredRows.forEach((row) => {{
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${{row.quarter}}</td>
-          <td>${{formatNumber(row.new_launched)}}</td>
-          <td>${{formatNumber(row.new_sold, "decimal")}}</td>
-          <td>${{formatNumber(row.weighted_price_current_supply, "currency")}}</td>
-          <td>${{formatNumber(row.weighted_price_available_supply, "currency")}}</td>
-          <td>${{formatNumber(row.new_project_avg_price, "currency")}}</td>
-          <td>${{formatNumber(row.sold_rate_quarterly, "percent")}}</td>
-          <td>${{formatNumber(row.sold_rate_cumulative, "percent")}}</td>
-          <td>${{formatNumber(row.active_projects)}}</td>
-          <td>${{formatNumber(row.new_projects)}}</td>
-        `;
-        body.appendChild(tr);
-      }});
-    }}
-
-    function renderCompareTable() {{
-      const body = document.getElementById("compareTableBody");
-      body.innerHTML = "";
-      const labels = unionQuarterLabels([["Hanoi", "Total"], ["HCMC", "Total"]]).reverse();
-      const hanoi = new Map(filteredRecordsFor("Hanoi", "Total").map((row) => [row.quarter, row]));
-      const hcmc = new Map(filteredRecordsFor("HCMC", "Total").map((row) => [row.quarter, row]));
-      labels.forEach((quarter) => {{
-        const hn = hanoi.get(quarter);
-        const hc = hcmc.get(quarter);
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${{quarter}}</td>
-          <td>${{formatNumber(hn?.new_launched)}}</td>
-          <td>${{formatNumber(hc?.new_launched)}}</td>
-          <td>${{formatNumber(hn?.new_sold, "decimal")}}</td>
-          <td>${{formatNumber(hc?.new_sold, "decimal")}}</td>
-          <td>${{formatNumber(hn?.sold_rate_quarterly, "percent")}}</td>
-          <td>${{formatNumber(hc?.sold_rate_quarterly, "percent")}}</td>
-          <td>${{formatNumber(hn?.sold_rate_cumulative, "percent")}}</td>
-          <td>${{formatNumber(hc?.sold_rate_cumulative, "percent")}}</td>
-          <td>${{formatNumber(hn?.active_projects)}}</td>
-          <td>${{formatNumber(hc?.active_projects)}}</td>
-          <td>${{formatNumber(hn?.weighted_price_current_supply, "currency")}}</td>
-          <td>${{formatNumber(hc?.weighted_price_current_supply, "currency")}}</td>
-        `;
-        body.appendChild(tr);
-      }});
     }}
 
     function renderMapAnalytics(points, latestQuarter) {{
       if (state.mapMode === "active_2026Q2") {{
         const metrics = aggregateMapMetrics(points);
-        document.getElementById("mapSectionTitle").textContent = "Map of Active Projects";
         document.getElementById("mapSectionNote").textContent = "Projects with sale status = current in 2026Q2, joined from Time Series to Project Identification for latitude and longitude.";
         document.getElementById("mapKpi1Title").textContent = "Quarterly Sold Rate";
         document.getElementById("mapKpi2Title").textContent = "Accumulated Sold Rate";
@@ -2572,8 +2818,9 @@ def build_html(dataset: dict[str, Any]) -> str:
 
       const futureLabel = state.mapMode === "future_2027F" ? "2027F" : "2026F";
       const metrics = aggregateMapMetrics(points);
-      document.getElementById("mapSectionTitle").textContent = `Project Map ${{futureLabel}}`;
-      document.getElementById("mapSectionNote").textContent = `Projects are filtered to the latest quarter and keep only rows with ${{futureLabel}} launch > 0. Sale status is not used as a filter.`;
+      document.getElementById("mapSectionNote").textContent = state.mapMode === "future_2026F"
+        ? "Projects are filtered to the latest quarter and keep only rows with 2026F launch > 0. Green = new in 2026, orange = continuing in H2 2026. Sale status is not used as a filter."
+        : "Projects are filtered to the latest quarter and keep only rows with 2027F launch > 0. Sale status is not used as a filter.";
       document.getElementById("mapKpi1Title").textContent = `${{futureLabel}} Launch`;
       document.getElementById("mapKpi2Title").textContent = "Future Projects";
       document.getElementById("mapChart1Title").textContent = `${{futureLabel}} Launch by Segment`;
@@ -2641,7 +2888,9 @@ def build_html(dataset: dict[str, Any]) -> str:
               <td>${{point.segment}}</td>
               <td>${{point.quarter}}</td>
               <td>${{point.sale_status || "-"}}</td>
+              <td>${{point.future_project_type || "-"}}</td>
               <td>${{formatNumber(point.future_launch_2026)}}</td>
+              <td>${{formatNumber(point.future_h2_additional_launch)}}</td>
               <td>${{formatNumber(point.future_sold_2026)}}</td>
               <td>${{point.grading || "-"}}</td>
               <td>${{point.region || "-"}}</td>
@@ -2676,6 +2925,43 @@ def build_html(dataset: dict[str, Any]) -> str:
       }});
     }}
 
+    function futureMarkerStyle(point) {{
+      if (state.mapMode === "future_2026F") {{
+        if (point.future_project_type === "New in 2026") {{
+          return {{
+            radius: 8,
+            color: "#68B794",
+            fillColor: "#68B794",
+            fillOpacity: 0.9,
+            weight: 2,
+          }};
+        }}
+        return {{
+          radius: 8,
+          color: "#E08E45",
+          fillColor: "#E08E45",
+          fillOpacity: 0.9,
+          weight: 2,
+        }};
+      }}
+      return {{
+        radius: 8,
+        color: "#3281F5",
+        fillColor: "#3281F5",
+        fillOpacity: 0.85,
+        weight: 2,
+      }};
+    }}
+
+    function isRenderableVietnamCoord(lat, lng) {{
+      return Number.isFinite(lat)
+        && Number.isFinite(lng)
+        && lat >= 8
+        && lat <= 23
+        && lng >= 100
+        && lng <= 110;
+    }}
+
     function ensureMap() {{
       if (!projectMap) {{
         projectMap = L.map("projectMap", {{ zoomControl: true }}).setView([16.1, 106.2], 6);
@@ -2688,6 +2974,7 @@ def build_html(dataset: dict[str, Any]) -> str:
 
     function renderMap() {{
       ensureMap();
+      projectMap.invalidateSize();
       projectMarkers.forEach((marker) => projectMap.removeLayer(marker));
       projectMarkers = [];
       const latestQuarter = latestMapQuarter();
@@ -2706,6 +2993,7 @@ def build_html(dataset: dict[str, Any]) -> str:
 
       if (!points.length) {{
         projectMap.setView([16.1, 106.2], 6);
+        projectMap.invalidateSize();
         return;
       }}
 
@@ -2713,17 +3001,21 @@ def build_html(dataset: dict[str, Any]) -> str:
       points.forEach((point) => {{
         const lat = Number(point.latitude);
         const lng = Number(point.longitude);
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {{
+        if (!isRenderableVietnamCoord(lat, lng)) {{
           return;
         }}
         bounds.push([lat, lng]);
-        const marker = L.marker([lat, lng]).addTo(projectMap);
+        const marker = state.mapMode === "active_2026Q2"
+          ? L.marker([lat, lng]).addTo(projectMap)
+          : L.circleMarker([lat, lng], futureMarkerStyle(point)).addTo(projectMap);
         marker.bindPopup(
           state.mapMode === "active_2026Q2"
             ? `
                 <strong>${{point.project_name}}</strong><br />
                 Quarter: ${{point.quarter}}<br />
                 Sale status: ${{point.sale_status || "-"}}<br />
+                Developer: ${{point.developer || "-"}}<br />
+                Total unit: ${{formatNumber(point.total_units)}}<br />
                 New launched: ${{formatNumber(point.new_launched)}}<br />
                 New sold: ${{formatNumber(point.new_sold, "decimal")}}<br />
                 Current supply: ${{formatNumber(point.current_supply)}}<br />
@@ -2733,7 +3025,12 @@ def build_html(dataset: dict[str, Any]) -> str:
                 <strong>${{point.project_name}}</strong><br />
                 Quarter: ${{point.quarter}}<br />
                 Sale status: ${{point.sale_status || "-"}}<br />
+                Developer: ${{point.developer || "-"}}<br />
+                Total unit: ${{formatNumber(point.total_units)}}<br />
+                Type: ${{point.future_project_type || "-"}}<br />
+                Current supply to Q2/2026: ${{formatNumber(point.current_supply)}}<br />
                 ${{state.mapMode === "future_2027F" ? "2027F" : "2026F"}} launch: ${{formatNumber(point.future_launch_2026)}}<br />
+                ${{state.mapMode === "future_2027F" ? "2027F pipeline" : "H2 2026 additional launch"}}: ${{formatNumber(point.future_h2_additional_launch)}}<br />
                 ${{state.mapMode === "future_2027F" ? "2027F" : "2026F"}} sold: ${{formatNumber(point.future_sold_2026)}}<br />
                 Grading: ${{point.grading || "-"}}<br />
                 Region: ${{point.region || "-"}}<br />
@@ -2748,6 +3045,202 @@ def build_html(dataset: dict[str, Any]) -> str:
       }} else if (bounds.length > 1) {{
         projectMap.fitBounds(bounds, {{ padding: [24, 24] }});
       }}
+      projectMap.invalidateSize();
+    }}
+
+    function slugify(value) {{
+      return String(value || "visual")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "")
+        || "visual";
+    }}
+
+    function csvEscape(value) {{
+      if (value === null || value === undefined) {{
+        return "";
+      }}
+      const text = String(value);
+      return (text.includes('"') || text.includes(",") || text.includes(String.fromCharCode(10)))
+        ? `"${{text.replace(/"/g, '""')}}"`
+        : text;
+    }}
+
+    function rowsToCsv(rows) {{
+      const newline = String.fromCharCode(10);
+      return rows.map((row) => row.map(csvEscape).join(",")).join(newline);
+    }}
+
+    function downloadCsv(filename, rows) {{
+      if (!rows?.length) {{
+        return;
+      }}
+      const blob = new Blob(["\ufeff" + rowsToCsv(rows)], {{ type: "text/csv;charset=utf-8;" }});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename.endsWith(".csv") ? filename : `${{filename}}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }}
+
+    function chartRows(chart) {{
+      if (!chart?.data) {{
+        return [];
+      }}
+      const labels = chart.data.labels || [];
+      const datasets = chart.data.datasets || [];
+      const header = ["Quarter", ...datasets.map((dataset) => dataset.label || "Series")];
+      const rows = labels.map((label, index) => [
+        label,
+        ...datasets.map((dataset) => dataset.data?.[index] ?? ""),
+      ]);
+      return [header, ...rows];
+    }}
+
+    function tableRows(table) {{
+      if (!table) {{
+        return [];
+      }}
+      const rows = [];
+      table.querySelectorAll("tr").forEach((tr) => {{
+        const cells = [...tr.querySelectorAll("th, td")].map((cell) => cell.innerText.trim());
+        if (cells.length) {{
+          rows.push(cells);
+        }}
+      }});
+      return rows;
+    }}
+
+    function latestSnapshotRows() {{
+      const metricKey = state.flowMetric;
+      const rows = [["Market", "Quarter", "Metric", "Value"]];
+      ["Hanoi", "HCMC"].forEach((city) => {{
+        const latest = latestRecord(city, "Total");
+        rows.push([
+          city,
+          latest?.quarter ?? "",
+          metricLabels[metricKey],
+          latest?.[metricKey] ?? "",
+        ]);
+      }});
+      return rows;
+    }}
+
+    function kpiRows(panel) {{
+      const title = panel.querySelector("h3")?.innerText.trim() || "KPI";
+      const value = panel.querySelector("strong")?.innerText.trim() || "";
+      const note = panel.querySelector("p")?.innerText.trim() || "";
+      return [["Metric", "Value", "Note"], [title, value, note]];
+    }}
+
+    function mapPointRows() {{
+      const points = filteredProjectPoints(latestMapPoints());
+      const isActive = state.mapMode === "active_2026Q2";
+      const header = isActive
+        ? ["Project", "Market", "Segment", "Quarter", "New launched", "New sold", "Current supply", "Available begin", "Sale status", "Price", "Developer", "Total unit", "Latitude", "Longitude"]
+        : ["Project", "Market", "Segment", "Quarter", "Sale status", "Type", "Future launch", "Future pipeline", "Future sold", "Grading", "Region", "Price", "Developer", "Total unit", "Latitude", "Longitude"];
+      const rows = points.map((point) => isActive
+        ? [
+            point.project_name,
+            point.city,
+            point.segment,
+            point.quarter,
+            point.new_launched,
+            point.new_sold,
+            point.current_supply,
+            point.available_begin,
+            point.sale_status,
+            point.price,
+            point.developer,
+            point.total_units,
+            point.latitude,
+            point.longitude,
+          ]
+        : [
+            point.project_name,
+            point.city,
+            point.segment,
+            point.quarter,
+            point.sale_status,
+            point.future_project_type,
+            point.future_launch_2026,
+            point.future_h2_additional_launch,
+            point.future_sold_2026,
+            point.grading,
+            point.region,
+            point.price,
+            point.developer,
+            point.total_units,
+            point.latitude,
+            point.longitude,
+          ]);
+      return [header, ...rows];
+    }}
+
+    function exportRowsForPanel(panel) {{
+      const exportKind = panel.dataset.exportKind || "";
+      if (exportKind === "latest-snapshot") {{
+        return latestSnapshotRows();
+      }}
+      if (exportKind === "kpi") {{
+        return kpiRows(panel);
+      }}
+      if (exportKind === "map-points") {{
+        return mapPointRows();
+      }}
+      const canvas = panel.querySelector("canvas");
+      if (canvas && charts[canvas.id]) {{
+        return chartRows(charts[canvas.id]);
+      }}
+      const table = panel.querySelector("table");
+      if (table) {{
+        return tableRows(table);
+      }}
+      return [];
+    }}
+
+    function csvFileNameForPanel(panel) {{
+      const title = panel.querySelector(".chart-title, h3")?.textContent?.trim() || "visual";
+      return `${{slugify(title)}}_${{slugify(state.mapMode)}}`;
+    }}
+
+    function ensureCsvButtons() {{
+      document.querySelectorAll(".panel.chart-card, .panel.table-card, .panel.map-kpi-card").forEach((panel) => {{
+        let host = panel.querySelector(".chart-actions");
+        if (!host) {{
+          const chartHead = panel.querySelector(".chart-head");
+          if (chartHead) {{
+            host = document.createElement("div");
+            host.className = "chart-actions";
+            chartHead.appendChild(host);
+          }} else if (panel.classList.contains("map-kpi-card")) {{
+            const kpiHead = panel.querySelector(".kpi-head");
+            if (!kpiHead) {{
+              return;
+            }}
+            host = document.createElement("div");
+            host.className = "chart-actions";
+            kpiHead.appendChild(host);
+          }} else {{
+            return;
+          }}
+        }}
+        if (host.querySelector(".csv-button")) {{
+          return;
+        }}
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "csv-button";
+        button.textContent = "csv";
+        button.addEventListener("click", () => {{
+          const rows = exportRowsForPanel(panel);
+          downloadCsv(csvFileNameForPanel(panel), rows);
+        }});
+        host.appendChild(button);
+      }});
     }}
 
     function renderFlowMetricButtons() {{
@@ -2769,7 +3262,8 @@ def build_html(dataset: dict[str, Any]) -> str:
       renderSummary();
       renderFlowCompare();
       renderBreakdownSection();
-      renderCompareTable();
+      renderPriceTrendSection();
+      renderPriceSegmentBreakdownSection();
       document.getElementById("focusLabel").textContent = `${{state.deepCity}} / ${{state.deepSegment}} / Flow: ${{metricLabels[state.flowMetric]}}`;
     }}
 
@@ -2777,7 +3271,7 @@ def build_html(dataset: dict[str, Any]) -> str:
       const startSelect = document.getElementById("startQuarterSelect");
       const endSelect = document.getElementById("endQuarterSelect");
       const eligibleQuarters = dashboardData.quarters.filter(
-        (quarter) => quarterSort(quarter) >= quarterSort("2022Q1")
+        (quarter) => quarterSort(quarter) >= quarterSort("2019Q1")
       );
       const options = eligibleQuarters
         .map((quarter) => `<option value="${{quarter}}">${{quarter}}</option>`)
@@ -2829,6 +3323,7 @@ def build_html(dataset: dict[str, Any]) -> str:
       renderPriceCompare();
       renderDeepDive();
       renderMap();
+      ensureCsvButtons();
     }}
 
     renderDashboard();
