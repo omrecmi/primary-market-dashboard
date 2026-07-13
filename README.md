@@ -6,6 +6,9 @@ This repository contains:
 - `primary_market_dashboard.html`: generated dashboard output
 - `primary_market_dashboard_data.json`: exported data payload
 - `build_primary_market_dashboard.py`: source code used to build the dashboard
+- `secondary_market_dashboard.html`: generated Hanoi secondary market dashboard
+- `secondary_market_dashboard_data.json`: exported secondary market data payload
+- `build_secondary_market_dashboard.py`: source code used to build the secondary dashboard
 
 ## Vercel Protected Deploy
 
