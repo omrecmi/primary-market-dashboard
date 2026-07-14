@@ -914,7 +914,6 @@ def build_html(dataset: dict[str, Any]) -> str:
           <span class="chip">Latest reporting month: <span id="latestMonthChip"></span></span>
           <span class="chip">Latest available month: <span id="latestAvailableMonthChip"></span></span>
           <span class="chip">Total history: <span id="historyChip"></span></span>
-          <span class="chip">High-rise focus: <span id="focusChip">VHOP</span></span>
         </div>
       </article>
       <aside class="panel control-card">
@@ -927,14 +926,6 @@ def build_html(dataset: dict[str, Any]) -> str:
           <div class="button-row">
             <button id="applyWindowButton" class="refresh-button">Refresh</button>
           </div>
-        </div>
-        <div class="control-block">
-          <div class="control-label">High-rise focus group</div>
-          <select id="focusGroupSelect" class="control-select"></select>
-        </div>
-        <div class="control-block">
-          <div class="control-label">Low-rise focus project</div>
-          <select id="lowRiseProjectSelect" class="control-select"></select>
         </div>
         <div class="control-block">
           <div class="control-label">Source</div>
@@ -1035,6 +1026,10 @@ def build_html(dataset: dict[str, Any]) -> str:
       <div class="section-head">
         <div>
           <h2>High-rise Deep Dive</h2>
+          <div class="control-block" style="margin-top: 10px; margin-bottom: 10px; max-width: 360px;">
+            <div class="control-label">High-rise focus group</div>
+            <select id="focusGroupSelect" class="control-select"></select>
+          </div>
           <div class="section-note">
             This section uses <code>Hanoi High-rise Secondary Database.xlsx</code>. It keeps project grouping and sector detail so you can track how Vinhomes Ocean Park and Vinhomes Smart City behave by month.
           </div>
@@ -1106,6 +1101,10 @@ def build_html(dataset: dict[str, Any]) -> str:
       <div class="section-head">
         <div>
           <h2>Low-rise Focus</h2>
+          <div class="control-block" style="margin-top: 10px; margin-bottom: 10px; max-width: 360px;">
+            <div class="control-label">Low-rise focus project</div>
+            <select id="lowRiseProjectSelect" class="control-select"></select>
+          </div>
           <div class="section-note">
             This section tracks low-rise secondary transactions for Vinhomes Ocean Park 1, 2, 3, and Vinhomes Global Gate. Sector-level detail uses <code>sector_name</code> where it is available in the source file.
           </div>
@@ -1409,7 +1408,6 @@ def build_html(dataset: dict[str, Any]) -> str:
       document.getElementById("latestMonthChip").textContent = summary.latest_month;
       document.getElementById("latestAvailableMonthChip").textContent = summary.latest_available_month;
       document.getElementById("historyChip").textContent = `${{summary.monthly_points}} months`;
-      document.getElementById("focusChip").textContent = state.focusGroup;
       document.getElementById("summaryTotal").textContent = formatInt(summary.latest_transactions);
       const deltaText = summary.mom_abs === null
         ? "First month in series."
