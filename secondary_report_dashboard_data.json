@@ -1,0 +1,3147 @@
+{
+  "meta": {
+    "source_file": "Hanoi Secondary Database all.xlsx",
+    "scope": "Only Q. districts plus H. Gia Lâm, H. Đông Anh, H. Đan Phượng",
+    "months": [
+      "2023-01",
+      "2023-02",
+      "2023-03",
+      "2023-04",
+      "2023-05",
+      "2023-06",
+      "2023-08",
+      "2023-09",
+      "2023-10",
+      "2023-11",
+      "2023-12",
+      "2024-01",
+      "2024-02",
+      "2024-03",
+      "2024-04",
+      "2024-05",
+      "2024-06",
+      "2024-07",
+      "2024-08",
+      "2024-09",
+      "2024-10",
+      "2024-11",
+      "2024-12",
+      "2025-01",
+      "2025-02",
+      "2025-03",
+      "2025-04",
+      "2025-05",
+      "2025-06",
+      "2025-07",
+      "2025-08",
+      "2025-09",
+      "2025-10",
+      "2025-11",
+      "2025-12",
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07"
+    ],
+    "default_start": "2025-01",
+    "default_end": "2026-05",
+    "asset_order": [
+      "Cao tầng",
+      "Thổ cư",
+      "Thấp tầng",
+      "Loại hình khác"
+    ],
+    "line_asset_order": [
+      "Cao tầng",
+      "Thổ cư",
+      "Thấp tầng"
+    ],
+    "region_order": [
+      "Khu Đông",
+      "Khu Nam",
+      "Khu Bắc",
+      "Khu Trung tâm",
+      "Nội thành",
+      "Khu Tây"
+    ]
+  },
+  "monthly_asset_mix": [
+    {
+      "month": "2023-01",
+      "label": "T1/2023",
+      "total": 1,
+      "mom": null,
+      "asset_counts": {
+        "Cao tầng": 0,
+        "Thổ cư": 0,
+        "Thấp tầng": 1,
+        "Loại hình khác": 0
+      }
+    },
+    {
+      "month": "2023-02",
+      "label": "T2/2023",
+      "total": 115,
+      "mom": 114.0,
+      "asset_counts": {
+        "Cao tầng": 115,
+        "Thổ cư": 0,
+        "Thấp tầng": 0,
+        "Loại hình khác": 0
+      }
+    },
+    {
+      "month": "2023-03",
+      "label": "T3/2023",
+      "total": 225,
+      "mom": 0.9565217391304348,
+      "asset_counts": {
+        "Cao tầng": 225,
+        "Thổ cư": 0,
+        "Thấp tầng": 0,
+        "Loại hình khác": 0
+      }
+    },
+    {
+      "month": "2023-04",
+      "label": "T4/2023",
+      "total": 264,
+      "mom": 0.17333333333333334,
+      "asset_counts": {
+        "Cao tầng": 264,
+        "Thổ cư": 0,
+        "Thấp tầng": 0,
+        "Loại hình khác": 0
+      }
+    },
+    {
+      "month": "2023-05",
+      "label": "T5/2023",
+      "total": 236,
+      "mom": -0.10606060606060608,
+      "asset_counts": {
+        "Cao tầng": 236,
+        "Thổ cư": 0,
+        "Thấp tầng": 0,
+        "Loại hình khác": 0
+      }
+    },
+    {
+      "month": "2023-06",
+      "label": "T6/2023",
+      "total": 220,
+      "mom": -0.06779661016949157,
+      "asset_counts": {
+        "Cao tầng": 220,
+        "Thổ cư": 0,
+        "Thấp tầng": 0,
+        "Loại hình khác": 0
+      }
+    },
+    {
+      "month": "2023-08",
+      "label": "T8/2023",
+      "total": 281,
+      "mom": null,
+      "asset_counts": {
+        "Cao tầng": 281,
+        "Thổ cư": 0,
+        "Thấp tầng": 0,
+        "Loại hình khác": 0
+      }
+    },
+    {
+      "month": "2023-09",
+      "label": "T9/2023",
+      "total": 270,
+      "mom": -0.039145907473309594,
+      "asset_counts": {
+        "Cao tầng": 270,
+        "Thổ cư": 0,
+        "Thấp tầng": 0,
+        "Loại hình khác": 0
+      }
+    },
+    {
+      "month": "2023-10",
+      "label": "T10/2023",
+      "total": 1996,
+      "mom": 6.392592592592592,
+      "asset_counts": {
+        "Cao tầng": 1394,
+        "Thổ cư": 585,
+        "Thấp tầng": 13,
+        "Loại hình khác": 4
+      }
+    },
+    {
+      "month": "2023-11",
+      "label": "T11/2023",
+      "total": 2481,
+      "mom": 0.24298597194388782,
+      "asset_counts": {
+        "Cao tầng": 1735,
+        "Thổ cư": 698,
+        "Thấp tầng": 48,
+        "Loại hình khác": 0
+      }
+    },
+    {
+      "month": "2023-12",
+      "label": "T12/2023",
+      "total": 5507,
+      "mom": 1.2196694881096333,
+      "asset_counts": {
+        "Cao tầng": 2490,
+        "Thổ cư": 2595,
+        "Thấp tầng": 133,
+        "Loại hình khác": 289
+      }
+    },
+    {
+      "month": "2024-01",
+      "label": "T1/2024",
+      "total": 5742,
+      "mom": 0.04267296168512802,
+      "asset_counts": {
+        "Cao tầng": 2616,
+        "Thổ cư": 2866,
+        "Thấp tầng": 174,
+        "Loại hình khác": 86
+      }
+    },
+    {
+      "month": "2024-02",
+      "label": "T2/2024",
+      "total": 3424,
+      "mom": -0.40369209334726575,
+      "asset_counts": {
+        "Cao tầng": 1359,
+        "Thổ cư": 1952,
+        "Thấp tầng": 108,
+        "Loại hình khác": 5
+      }
+    },
+    {
+      "month": "2024-03",
+      "label": "T3/2024",
+      "total": 7341,
+      "mom": 1.143983644859813,
+      "asset_counts": {
+        "Cao tầng": 3271,
+        "Thổ cư": 3883,
+        "Thấp tầng": 162,
+        "Loại hình khác": 25
+      }
+    },
+    {
+      "month": "2024-04",
+      "label": "T4/2024",
+      "total": 9646,
+      "mom": 0.3139899196294782,
+      "asset_counts": {
+        "Cao tầng": 3673,
+        "Thổ cư": 5497,
+        "Thấp tầng": 361,
+        "Loại hình khác": 115
+      }
+    },
+    {
+      "month": "2024-05",
+      "label": "T5/2024",
+      "total": 6764,
+      "mom": -0.2987766950031101,
+      "asset_counts": {
+        "Cao tầng": 2520,
+        "Thổ cư": 3901,
+        "Thấp tầng": 141,
+        "Loại hình khác": 202
+      }
+    },
+    {
+      "month": "2024-06",
+      "label": "T6/2024",
+      "total": 6696,
+      "mom": -0.010053222945002993,
+      "asset_counts": {
+        "Cao tầng": 2459,
+        "Thổ cư": 3739,
+        "Thấp tầng": 197,
+        "Loại hình khác": 301
+      }
+    },
+    {
+      "month": "2024-07",
+      "label": "T7/2024",
+      "total": 7412,
+      "mom": 0.10692951015531671,
+      "asset_counts": {
+        "Cao tầng": 3328,
+        "Thổ cư": 3628,
+        "Thấp tầng": 238,
+        "Loại hình khác": 218
+      }
+    },
+    {
+      "month": "2024-08",
+      "label": "T8/2024",
+      "total": 7502,
+      "mom": 0.012142471667566213,
+      "asset_counts": {
+        "Cao tầng": 2920,
+        "Thổ cư": 4061,
+        "Thấp tầng": 269,
+        "Loại hình khác": 252
+      }
+    },
+    {
+      "month": "2024-09",
+      "label": "T9/2024",
+      "total": 6908,
+      "mom": -0.07917888563049857,
+      "asset_counts": {
+        "Cao tầng": 3226,
+        "Thổ cư": 3194,
+        "Thấp tầng": 180,
+        "Loại hình khác": 308
+      }
+    },
+    {
+      "month": "2024-10",
+      "label": "T10/2024",
+      "total": 7403,
+      "mom": 0.07165605095541405,
+      "asset_counts": {
+        "Cao tầng": 3052,
+        "Thổ cư": 3696,
+        "Thấp tầng": 335,
+        "Loại hình khác": 320
+      }
+    },
+    {
+      "month": "2024-11",
+      "label": "T11/2024",
+      "total": 7052,
+      "mom": -0.04741321086046202,
+      "asset_counts": {
+        "Cao tầng": 3058,
+        "Thổ cư": 3477,
+        "Thấp tầng": 172,
+        "Loại hình khác": 345
+      }
+    },
+    {
+      "month": "2024-12",
+      "label": "T12/2024",
+      "total": 6915,
+      "mom": -0.019427112875779917,
+      "asset_counts": {
+        "Cao tầng": 2612,
+        "Thổ cư": 3819,
+        "Thấp tầng": 293,
+        "Loại hình khác": 191
+      }
+    },
+    {
+      "month": "2025-01",
+      "label": "T1/2025",
+      "total": 4686,
+      "mom": -0.3223427331887202,
+      "asset_counts": {
+        "Cao tầng": 1719,
+        "Thổ cư": 2412,
+        "Thấp tầng": 420,
+        "Loại hình khác": 135
+      }
+    },
+    {
+      "month": "2025-02",
+      "label": "T2/2025",
+      "total": 2268,
+      "mom": -0.5160051216389245,
+      "asset_counts": {
+        "Cao tầng": 1096,
+        "Thổ cư": 1071,
+        "Thấp tầng": 37,
+        "Loại hình khác": 64
+      }
+    },
+    {
+      "month": "2025-03",
+      "label": "T3/2025",
+      "total": 5527,
+      "mom": 1.4369488536155202,
+      "asset_counts": {
+        "Cao tầng": 2546,
+        "Thổ cư": 2529,
+        "Thấp tầng": 291,
+        "Loại hình khác": 161
+      }
+    },
+    {
+      "month": "2025-04",
+      "label": "T4/2025",
+      "total": 9540,
+      "mom": 0.7260720101320788,
+      "asset_counts": {
+        "Cao tầng": 3620,
+        "Thổ cư": 5099,
+        "Thấp tầng": 618,
+        "Loại hình khác": 203
+      }
+    },
+    {
+      "month": "2025-05",
+      "label": "T5/2025",
+      "total": 7392,
+      "mom": -0.22515723270440247,
+      "asset_counts": {
+        "Cao tầng": 2834,
+        "Thổ cư": 4032,
+        "Thấp tầng": 365,
+        "Loại hình khác": 161
+      }
+    },
+    {
+      "month": "2025-06",
+      "label": "T6/2025",
+      "total": 7709,
+      "mom": 0.04288419913419905,
+      "asset_counts": {
+        "Cao tầng": 3232,
+        "Thổ cư": 3927,
+        "Thấp tầng": 458,
+        "Loại hình khác": 92
+      }
+    },
+    {
+      "month": "2025-07",
+      "label": "T7/2025",
+      "total": 6513,
+      "mom": -0.15514333895446886,
+      "asset_counts": {
+        "Cao tầng": 3427,
+        "Thổ cư": 2599,
+        "Thấp tầng": 353,
+        "Loại hình khác": 135
+      }
+    },
+    {
+      "month": "2025-08",
+      "label": "T8/2025",
+      "total": 7661,
+      "mom": 0.17626285889758941,
+      "asset_counts": {
+        "Cao tầng": 4214,
+        "Thổ cư": 2879,
+        "Thấp tầng": 398,
+        "Loại hình khác": 171
+      }
+    },
+    {
+      "month": "2025-09",
+      "label": "T9/2025",
+      "total": 5764,
+      "mom": -0.24761780446416914,
+      "asset_counts": {
+        "Cao tầng": 3236,
+        "Thổ cư": 2182,
+        "Thấp tầng": 224,
+        "Loại hình khác": 122
+      }
+    },
+    {
+      "month": "2025-10",
+      "label": "T10/2025",
+      "total": 8219,
+      "mom": 0.42591950034698134,
+      "asset_counts": {
+        "Cao tầng": 4022,
+        "Thổ cư": 3578,
+        "Thấp tầng": 373,
+        "Loại hình khác": 246
+      }
+    },
+    {
+      "month": "2025-11",
+      "label": "T11/2025",
+      "total": 6983,
+      "mom": -0.15038325830392996,
+      "asset_counts": {
+        "Cao tầng": 3178,
+        "Thổ cư": 3326,
+        "Thấp tầng": 307,
+        "Loại hình khác": 172
+      }
+    },
+    {
+      "month": "2025-12",
+      "label": "T12/2025",
+      "total": 6465,
+      "mom": -0.07418015179722182,
+      "asset_counts": {
+        "Cao tầng": 2662,
+        "Thổ cư": 3366,
+        "Thấp tầng": 312,
+        "Loại hình khác": 129
+      }
+    },
+    {
+      "month": "2026-01",
+      "label": "T1/2026",
+      "total": 4576,
+      "mom": -0.29218870843000777,
+      "asset_counts": {
+        "Cao tầng": 1705,
+        "Thổ cư": 2367,
+        "Thấp tầng": 376,
+        "Loại hình khác": 128
+      }
+    },
+    {
+      "month": "2026-02",
+      "label": "T2/2026",
+      "total": 3268,
+      "mom": -0.28583916083916083,
+      "asset_counts": {
+        "Cao tầng": 1134,
+        "Thổ cư": 1845,
+        "Thấp tầng": 210,
+        "Loại hình khác": 79
+      }
+    },
+    {
+      "month": "2026-03",
+      "label": "T3/2026",
+      "total": 3076,
+      "mom": -0.05875152998776012,
+      "asset_counts": {
+        "Cao tầng": 1036,
+        "Thổ cư": 1825,
+        "Thấp tầng": 112,
+        "Loại hình khác": 103
+      }
+    },
+    {
+      "month": "2026-04",
+      "label": "T4/2026",
+      "total": 3879,
+      "mom": 0.26105331599479853,
+      "asset_counts": {
+        "Cao tầng": 1432,
+        "Thổ cư": 2167,
+        "Thấp tầng": 199,
+        "Loại hình khác": 81
+      }
+    },
+    {
+      "month": "2026-05",
+      "label": "T5/2026",
+      "total": 2917,
+      "mom": -0.24800206238721323,
+      "asset_counts": {
+        "Cao tầng": 1095,
+        "Thổ cư": 1737,
+        "Thấp tầng": 139,
+        "Loại hình khác": 21
+      }
+    },
+    {
+      "month": "2026-06",
+      "label": "T6/2026",
+      "total": 2087,
+      "mom": -0.28453890983887553,
+      "asset_counts": {
+        "Cao tầng": 1182,
+        "Thổ cư": 754,
+        "Thấp tầng": 91,
+        "Loại hình khác": 70
+      }
+    },
+    {
+      "month": "2026-07",
+      "label": "T7/2026",
+      "total": 1,
+      "mom": -0.9995208433157643,
+      "asset_counts": {
+        "Cao tầng": 0,
+        "Thổ cư": 1,
+        "Thấp tầng": 0,
+        "Loại hình khác": 0
+      }
+    }
+  ],
+  "asset_line_trend": [
+    {
+      "month": "2023-01",
+      "label": "T1/2023",
+      "Cao tầng": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 1,
+        "mom": null,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2023-02",
+      "label": "T2/2023",
+      "Cao tầng": {
+        "transactions": 115,
+        "mom": null,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 0,
+        "mom": -1.0,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2023-03",
+      "label": "T3/2023",
+      "Cao tầng": {
+        "transactions": 225,
+        "mom": 0.9565217391304348,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2023-04",
+      "label": "T4/2023",
+      "Cao tầng": {
+        "transactions": 264,
+        "mom": 0.17333333333333334,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2023-05",
+      "label": "T5/2023",
+      "Cao tầng": {
+        "transactions": 236,
+        "mom": -0.10606060606060608,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2023-06",
+      "label": "T6/2023",
+      "Cao tầng": {
+        "transactions": 220,
+        "mom": -0.06779661016949157,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2023-08",
+      "label": "T8/2023",
+      "Cao tầng": {
+        "transactions": 281,
+        "mom": null,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2023-09",
+      "label": "T9/2023",
+      "Cao tầng": {
+        "transactions": 270,
+        "mom": -0.039145907473309594,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 0,
+        "mom": null,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2023-10",
+      "label": "T10/2023",
+      "Cao tầng": {
+        "transactions": 1394,
+        "mom": 4.162962962962963,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 585,
+        "mom": null,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 13,
+        "mom": null,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2023-11",
+      "label": "T11/2023",
+      "Cao tầng": {
+        "transactions": 1735,
+        "mom": 0.24461979913916787,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 698,
+        "mom": 0.19316239316239314,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 48,
+        "mom": 2.6923076923076925,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2023-12",
+      "label": "T12/2023",
+      "Cao tầng": {
+        "transactions": 2490,
+        "mom": 0.4351585014409223,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 2595,
+        "mom": 2.7177650429799427,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 133,
+        "mom": 1.7708333333333335,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2024-01",
+      "label": "T1/2024",
+      "Cao tầng": {
+        "transactions": 2616,
+        "mom": 0.050602409638554224,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 2866,
+        "mom": 0.10443159922928702,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 174,
+        "mom": 0.30827067669172936,
+        "yoy": 173.0
+      }
+    },
+    {
+      "month": "2024-02",
+      "label": "T2/2024",
+      "Cao tầng": {
+        "transactions": 1359,
+        "mom": -0.48050458715596334,
+        "yoy": 10.817391304347826
+      },
+      "Thổ cư": {
+        "transactions": 1952,
+        "mom": -0.3189113747383112,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 108,
+        "mom": -0.3793103448275862,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2024-03",
+      "label": "T3/2024",
+      "Cao tầng": {
+        "transactions": 3271,
+        "mom": 1.4069168506254597,
+        "yoy": 13.537777777777778
+      },
+      "Thổ cư": {
+        "transactions": 3883,
+        "mom": 0.9892418032786885,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 162,
+        "mom": 0.5,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2024-04",
+      "label": "T4/2024",
+      "Cao tầng": {
+        "transactions": 3673,
+        "mom": 0.12289819627025378,
+        "yoy": 12.912878787878787
+      },
+      "Thổ cư": {
+        "transactions": 5497,
+        "mom": 0.4156579963945404,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 361,
+        "mom": 1.2283950617283952,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2024-05",
+      "label": "T5/2024",
+      "Cao tầng": {
+        "transactions": 2520,
+        "mom": -0.31391233324258094,
+        "yoy": 9.677966101694915
+      },
+      "Thổ cư": {
+        "transactions": 3901,
+        "mom": -0.2903401855557577,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 141,
+        "mom": -0.6094182825484764,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2024-06",
+      "label": "T6/2024",
+      "Cao tầng": {
+        "transactions": 2459,
+        "mom": -0.02420634920634923,
+        "yoy": 10.177272727272728
+      },
+      "Thổ cư": {
+        "transactions": 3739,
+        "mom": -0.041527813381184275,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 197,
+        "mom": 0.3971631205673758,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2024-07",
+      "label": "T7/2024",
+      "Cao tầng": {
+        "transactions": 3328,
+        "mom": 0.3533956893045953,
+        "yoy": null
+      },
+      "Thổ cư": {
+        "transactions": 3628,
+        "mom": -0.02968708210751536,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 238,
+        "mom": 0.20812182741116758,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2024-08",
+      "label": "T8/2024",
+      "Cao tầng": {
+        "transactions": 2920,
+        "mom": -0.12259615384615385,
+        "yoy": 9.391459074733095
+      },
+      "Thổ cư": {
+        "transactions": 4061,
+        "mom": 0.11934950385887544,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 269,
+        "mom": 0.13025210084033612,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2024-09",
+      "label": "T9/2024",
+      "Cao tầng": {
+        "transactions": 3226,
+        "mom": 0.10479452054794525,
+        "yoy": 10.948148148148148
+      },
+      "Thổ cư": {
+        "transactions": 3194,
+        "mom": -0.21349421324796847,
+        "yoy": null
+      },
+      "Thấp tầng": {
+        "transactions": 180,
+        "mom": -0.33085501858736055,
+        "yoy": null
+      }
+    },
+    {
+      "month": "2024-10",
+      "label": "T10/2024",
+      "Cao tầng": {
+        "transactions": 3052,
+        "mom": -0.05393676379417234,
+        "yoy": 1.1893830703012913
+      },
+      "Thổ cư": {
+        "transactions": 3696,
+        "mom": 0.15716969317470264,
+        "yoy": 5.317948717948718
+      },
+      "Thấp tầng": {
+        "transactions": 335,
+        "mom": 0.8611111111111112,
+        "yoy": 24.76923076923077
+      }
+    },
+    {
+      "month": "2024-11",
+      "label": "T11/2024",
+      "Cao tầng": {
+        "transactions": 3058,
+        "mom": 0.001965923984272644,
+        "yoy": 0.7625360230547551
+      },
+      "Thổ cư": {
+        "transactions": 3477,
+        "mom": -0.059253246753246724,
+        "yoy": 3.981375358166189
+      },
+      "Thấp tầng": {
+        "transactions": 172,
+        "mom": -0.4865671641791045,
+        "yoy": 2.5833333333333335
+      }
+    },
+    {
+      "month": "2024-12",
+      "label": "T12/2024",
+      "Cao tầng": {
+        "transactions": 2612,
+        "mom": -0.14584695879659904,
+        "yoy": 0.048995983935743004
+      },
+      "Thổ cư": {
+        "transactions": 3819,
+        "mom": 0.09836065573770503,
+        "yoy": 0.47167630057803467
+      },
+      "Thấp tầng": {
+        "transactions": 293,
+        "mom": 0.7034883720930232,
+        "yoy": 1.2030075187969924
+      }
+    },
+    {
+      "month": "2025-01",
+      "label": "T1/2025",
+      "Cao tầng": {
+        "transactions": 1719,
+        "mom": -0.34188361408882084,
+        "yoy": -0.3428899082568807
+      },
+      "Thổ cư": {
+        "transactions": 2412,
+        "mom": -0.368421052631579,
+        "yoy": -0.15840893230983955
+      },
+      "Thấp tầng": {
+        "transactions": 420,
+        "mom": 0.4334470989761092,
+        "yoy": 1.4137931034482758
+      }
+    },
+    {
+      "month": "2025-02",
+      "label": "T2/2025",
+      "Cao tầng": {
+        "transactions": 1096,
+        "mom": -0.3624200116346713,
+        "yoy": -0.19352465047829281
+      },
+      "Thổ cư": {
+        "transactions": 1071,
+        "mom": -0.5559701492537313,
+        "yoy": -0.45133196721311475
+      },
+      "Thấp tầng": {
+        "transactions": 37,
+        "mom": -0.9119047619047619,
+        "yoy": -0.6574074074074074
+      }
+    },
+    {
+      "month": "2025-03",
+      "label": "T3/2025",
+      "Cao tầng": {
+        "transactions": 2546,
+        "mom": 1.3229927007299271,
+        "yoy": -0.22164475695505959
+      },
+      "Thổ cư": {
+        "transactions": 2529,
+        "mom": 1.361344537815126,
+        "yoy": -0.3486994591810456
+      },
+      "Thấp tầng": {
+        "transactions": 291,
+        "mom": 6.864864864864865,
+        "yoy": 0.7962962962962963
+      }
+    },
+    {
+      "month": "2025-04",
+      "label": "T4/2025",
+      "Cao tầng": {
+        "transactions": 3620,
+        "mom": 0.4218381775333857,
+        "yoy": -0.01442962156275529
+      },
+      "Thổ cư": {
+        "transactions": 5099,
+        "mom": 1.0162119414788453,
+        "yoy": -0.07240312897944334
+      },
+      "Thấp tầng": {
+        "transactions": 618,
+        "mom": 1.1237113402061856,
+        "yoy": 0.7119113573407203
+      }
+    },
+    {
+      "month": "2025-05",
+      "label": "T5/2025",
+      "Cao tầng": {
+        "transactions": 2834,
+        "mom": -0.21712707182320445,
+        "yoy": 0.1246031746031746
+      },
+      "Thổ cư": {
+        "transactions": 4032,
+        "mom": -0.20925671700333404,
+        "yoy": 0.03358113304280952
+      },
+      "Thấp tầng": {
+        "transactions": 365,
+        "mom": -0.4093851132686084,
+        "yoy": 1.5886524822695036
+      }
+    },
+    {
+      "month": "2025-06",
+      "label": "T6/2025",
+      "Cao tầng": {
+        "transactions": 3232,
+        "mom": 0.14043754410726894,
+        "yoy": 0.3143554290361936
+      },
+      "Thổ cư": {
+        "transactions": 3927,
+        "mom": -0.02604166666666663,
+        "yoy": 0.05028082374966569
+      },
+      "Thấp tầng": {
+        "transactions": 458,
+        "mom": 0.25479452054794516,
+        "yoy": 1.3248730964467006
+      }
+    },
+    {
+      "month": "2025-07",
+      "label": "T7/2025",
+      "Cao tầng": {
+        "transactions": 3427,
+        "mom": 0.060334158415841666,
+        "yoy": 0.029747596153846256
+      },
+      "Thổ cư": {
+        "transactions": 2599,
+        "mom": -0.3381716322892794,
+        "yoy": -0.2836273428886439
+      },
+      "Thấp tầng": {
+        "transactions": 353,
+        "mom": -0.22925764192139741,
+        "yoy": 0.48319327731092443
+      }
+    },
+    {
+      "month": "2025-08",
+      "label": "T8/2025",
+      "Cao tầng": {
+        "transactions": 4214,
+        "mom": 0.22964692150569022,
+        "yoy": 0.4431506849315068
+      },
+      "Thổ cư": {
+        "transactions": 2879,
+        "mom": 0.10773374374759515,
+        "yoy": -0.29106131494705734
+      },
+      "Thấp tầng": {
+        "transactions": 398,
+        "mom": 0.1274787535410764,
+        "yoy": 0.479553903345725
+      }
+    },
+    {
+      "month": "2025-09",
+      "label": "T9/2025",
+      "Cao tầng": {
+        "transactions": 3236,
+        "mom": -0.2320835310868533,
+        "yoy": 0.0030998140111593298
+      },
+      "Thổ cư": {
+        "transactions": 2182,
+        "mom": -0.24209795067731854,
+        "yoy": -0.3168440826549781
+      },
+      "Thấp tầng": {
+        "transactions": 224,
+        "mom": -0.4371859296482412,
+        "yoy": 0.24444444444444446
+      }
+    },
+    {
+      "month": "2025-10",
+      "label": "T10/2025",
+      "Cao tầng": {
+        "transactions": 4022,
+        "mom": 0.24289245982694685,
+        "yoy": 0.317824377457405
+      },
+      "Thổ cư": {
+        "transactions": 3578,
+        "mom": 0.6397800183318056,
+        "yoy": -0.031926406926406914
+      },
+      "Thấp tầng": {
+        "transactions": 373,
+        "mom": 0.6651785714285714,
+        "yoy": 0.11343283582089558
+      }
+    },
+    {
+      "month": "2025-11",
+      "label": "T11/2025",
+      "Cao tầng": {
+        "transactions": 3178,
+        "mom": -0.20984584783689708,
+        "yoy": 0.03924133420536302
+      },
+      "Thổ cư": {
+        "transactions": 3326,
+        "mom": -0.07043040804918954,
+        "yoy": -0.043428242737992506
+      },
+      "Thấp tầng": {
+        "transactions": 307,
+        "mom": -0.1769436997319035,
+        "yoy": 0.7848837209302326
+      }
+    },
+    {
+      "month": "2025-12",
+      "label": "T12/2025",
+      "Cao tầng": {
+        "transactions": 2662,
+        "mom": -0.16236626809314036,
+        "yoy": 0.019142419601837712
+      },
+      "Thổ cư": {
+        "transactions": 3366,
+        "mom": 0.01202645820805781,
+        "yoy": -0.11861743912018852
+      },
+      "Thấp tầng": {
+        "transactions": 312,
+        "mom": 0.016286644951140072,
+        "yoy": 0.06484641638225264
+      }
+    },
+    {
+      "month": "2026-01",
+      "label": "T1/2026",
+      "Cao tầng": {
+        "transactions": 1705,
+        "mom": -0.359504132231405,
+        "yoy": -0.00814426992437467
+      },
+      "Thổ cư": {
+        "transactions": 2367,
+        "mom": -0.29679144385026734,
+        "yoy": -0.018656716417910446
+      },
+      "Thấp tầng": {
+        "transactions": 376,
+        "mom": 0.20512820512820507,
+        "yoy": -0.10476190476190472
+      }
+    },
+    {
+      "month": "2026-02",
+      "label": "T2/2026",
+      "Cao tầng": {
+        "transactions": 1134,
+        "mom": -0.33489736070381226,
+        "yoy": 0.034671532846715314
+      },
+      "Thổ cư": {
+        "transactions": 1845,
+        "mom": -0.22053231939163498,
+        "yoy": 0.7226890756302522
+      },
+      "Thấp tầng": {
+        "transactions": 210,
+        "mom": -0.4414893617021277,
+        "yoy": 4.675675675675675
+      }
+    },
+    {
+      "month": "2026-03",
+      "label": "T3/2026",
+      "Cao tầng": {
+        "transactions": 1036,
+        "mom": -0.0864197530864198,
+        "yoy": -0.5930871956009427
+      },
+      "Thổ cư": {
+        "transactions": 1825,
+        "mom": -0.010840108401083959,
+        "yoy": -0.2783708975879794
+      },
+      "Thấp tầng": {
+        "transactions": 112,
+        "mom": -0.4666666666666667,
+        "yoy": -0.6151202749140894
+      }
+    },
+    {
+      "month": "2026-04",
+      "label": "T4/2026",
+      "Cao tầng": {
+        "transactions": 1432,
+        "mom": 0.38223938223938214,
+        "yoy": -0.6044198895027624
+      },
+      "Thổ cư": {
+        "transactions": 2167,
+        "mom": 0.18739726027397263,
+        "yoy": -0.5750147087664248
+      },
+      "Thấp tầng": {
+        "transactions": 199,
+        "mom": 0.7767857142857142,
+        "yoy": -0.6779935275080906
+      }
+    },
+    {
+      "month": "2026-05",
+      "label": "T5/2026",
+      "Cao tầng": {
+        "transactions": 1095,
+        "mom": -0.23533519553072624,
+        "yoy": -0.6136203246294989
+      },
+      "Thổ cư": {
+        "transactions": 1737,
+        "mom": -0.19843101061375168,
+        "yoy": -0.5691964285714286
+      },
+      "Thấp tầng": {
+        "transactions": 139,
+        "mom": -0.3015075376884422,
+        "yoy": -0.6191780821917808
+      }
+    },
+    {
+      "month": "2026-06",
+      "label": "T6/2026",
+      "Cao tầng": {
+        "transactions": 1182,
+        "mom": 0.07945205479452055,
+        "yoy": -0.6342821782178218
+      },
+      "Thổ cư": {
+        "transactions": 754,
+        "mom": -0.5659182498560738,
+        "yoy": -0.8079959256429845
+      },
+      "Thấp tầng": {
+        "transactions": 91,
+        "mom": -0.3453237410071942,
+        "yoy": -0.8013100436681223
+      }
+    },
+    {
+      "month": "2026-07",
+      "label": "T7/2026",
+      "Cao tầng": {
+        "transactions": 0,
+        "mom": -1.0,
+        "yoy": -1.0
+      },
+      "Thổ cư": {
+        "transactions": 1,
+        "mom": -0.9986737400530504,
+        "yoy": -0.9996152366294728
+      },
+      "Thấp tầng": {
+        "transactions": 0,
+        "mom": -1.0,
+        "yoy": -1.0
+      }
+    }
+  ],
+  "region_share": {
+    "high_rise": [
+      {
+        "month": "2023-01",
+        "label": "T1/2023",
+        "total": 0,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        },
+        "shares": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        }
+      },
+      {
+        "month": "2023-02",
+        "label": "T2/2023",
+        "total": 115,
+        "counts": {
+          "Khu Đông": 62,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 53
+        },
+        "shares": {
+          "Khu Đông": 0.5391304347826087,
+          "Khu Nam": 0.0,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0,
+          "Nội thành": 0.0,
+          "Khu Tây": 0.4608695652173913
+        }
+      },
+      {
+        "month": "2023-03",
+        "label": "T3/2023",
+        "total": 225,
+        "counts": {
+          "Khu Đông": 117,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 108
+        },
+        "shares": {
+          "Khu Đông": 0.52,
+          "Khu Nam": 0.0,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0,
+          "Nội thành": 0.0,
+          "Khu Tây": 0.48
+        }
+      },
+      {
+        "month": "2023-04",
+        "label": "T4/2023",
+        "total": 264,
+        "counts": {
+          "Khu Đông": 128,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 136
+        },
+        "shares": {
+          "Khu Đông": 0.48484848484848486,
+          "Khu Nam": 0.0,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0,
+          "Nội thành": 0.0,
+          "Khu Tây": 0.5151515151515151
+        }
+      },
+      {
+        "month": "2023-05",
+        "label": "T5/2023",
+        "total": 236,
+        "counts": {
+          "Khu Đông": 134,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 102
+        },
+        "shares": {
+          "Khu Đông": 0.5677966101694916,
+          "Khu Nam": 0.0,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0,
+          "Nội thành": 0.0,
+          "Khu Tây": 0.4322033898305085
+        }
+      },
+      {
+        "month": "2023-06",
+        "label": "T6/2023",
+        "total": 220,
+        "counts": {
+          "Khu Đông": 106,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 114
+        },
+        "shares": {
+          "Khu Đông": 0.4818181818181818,
+          "Khu Nam": 0.0,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0,
+          "Nội thành": 0.0,
+          "Khu Tây": 0.5181818181818182
+        }
+      },
+      {
+        "month": "2023-08",
+        "label": "T8/2023",
+        "total": 281,
+        "counts": {
+          "Khu Đông": 160,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 121
+        },
+        "shares": {
+          "Khu Đông": 0.5693950177935944,
+          "Khu Nam": 0.0,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0,
+          "Nội thành": 0.0,
+          "Khu Tây": 0.4306049822064057
+        }
+      },
+      {
+        "month": "2023-09",
+        "label": "T9/2023",
+        "total": 269,
+        "counts": {
+          "Khu Đông": 153,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 116
+        },
+        "shares": {
+          "Khu Đông": 0.5687732342007435,
+          "Khu Nam": 0.0,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0,
+          "Nội thành": 0.0,
+          "Khu Tây": 0.4312267657992565
+        }
+      },
+      {
+        "month": "2023-10",
+        "label": "T10/2023",
+        "total": 1351,
+        "counts": {
+          "Khu Đông": 247,
+          "Khu Nam": 304,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 9,
+          "Nội thành": 129,
+          "Khu Tây": 662
+        },
+        "shares": {
+          "Khu Đông": 0.18282753515914138,
+          "Khu Nam": 0.22501850481125094,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.006661732050333087,
+          "Nội thành": 0.09548482605477424,
+          "Khu Tây": 0.4900074019245004
+        }
+      },
+      {
+        "month": "2023-11",
+        "label": "T11/2023",
+        "total": 1690,
+        "counts": {
+          "Khu Đông": 302,
+          "Khu Nam": 366,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 5,
+          "Nội thành": 172,
+          "Khu Tây": 845
+        },
+        "shares": {
+          "Khu Đông": 0.178698224852071,
+          "Khu Nam": 0.2165680473372781,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0029585798816568047,
+          "Nội thành": 0.10177514792899409,
+          "Khu Tây": 0.5
+        }
+      },
+      {
+        "month": "2023-12",
+        "label": "T12/2023",
+        "total": 2437,
+        "counts": {
+          "Khu Đông": 567,
+          "Khu Nam": 336,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 6,
+          "Nội thành": 145,
+          "Khu Tây": 1383
+        },
+        "shares": {
+          "Khu Đông": 0.23266311038161674,
+          "Khu Nam": 0.1378744357816988,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0024620434961017644,
+          "Nội thành": 0.05949938448912597,
+          "Khu Tây": 0.5675010258514567
+        }
+      },
+      {
+        "month": "2024-01",
+        "label": "T1/2024",
+        "total": 2518,
+        "counts": {
+          "Khu Đông": 573,
+          "Khu Nam": 294,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 135,
+          "Khu Tây": 1516
+        },
+        "shares": {
+          "Khu Đông": 0.22756155679110404,
+          "Khu Nam": 0.11675933280381255,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0,
+          "Nội thành": 0.05361397934868944,
+          "Khu Tây": 0.6020651310563939
+        }
+      },
+      {
+        "month": "2024-02",
+        "label": "T2/2024",
+        "total": 1248,
+        "counts": {
+          "Khu Đông": 331,
+          "Khu Nam": 136,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 2,
+          "Nội thành": 82,
+          "Khu Tây": 697
+        },
+        "shares": {
+          "Khu Đông": 0.265224358974359,
+          "Khu Nam": 0.10897435897435898,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0016025641025641025,
+          "Nội thành": 0.06570512820512821,
+          "Khu Tây": 0.5584935897435898
+        }
+      },
+      {
+        "month": "2024-03",
+        "label": "T3/2024",
+        "total": 2599,
+        "counts": {
+          "Khu Đông": 914,
+          "Khu Nam": 342,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 5,
+          "Nội thành": 174,
+          "Khu Tây": 1164
+        },
+        "shares": {
+          "Khu Đông": 0.351673720661793,
+          "Khu Nam": 0.13158907272027703,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.001923816852635629,
+          "Nội thành": 0.06694882647171989,
+          "Khu Tây": 0.44786456329357444
+        }
+      },
+      {
+        "month": "2024-04",
+        "label": "T4/2024",
+        "total": 3067,
+        "counts": {
+          "Khu Đông": 973,
+          "Khu Nam": 401,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 12,
+          "Nội thành": 201,
+          "Khu Tây": 1480
+        },
+        "shares": {
+          "Khu Đông": 0.3172481252037822,
+          "Khu Nam": 0.13074665797195956,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0039126181936746,
+          "Nội thành": 0.06553635474404956,
+          "Khu Tây": 0.48255624388653406
+        }
+      },
+      {
+        "month": "2024-05",
+        "label": "T5/2024",
+        "total": 2210,
+        "counts": {
+          "Khu Đông": 659,
+          "Khu Nam": 294,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 6,
+          "Nội thành": 218,
+          "Khu Tây": 1033
+        },
+        "shares": {
+          "Khu Đông": 0.2981900452488688,
+          "Khu Nam": 0.1330316742081448,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0027149321266968325,
+          "Nội thành": 0.09864253393665158,
+          "Khu Tây": 0.467420814479638
+        }
+      },
+      {
+        "month": "2024-06",
+        "label": "T6/2024",
+        "total": 1631,
+        "counts": {
+          "Khu Đông": 461,
+          "Khu Nam": 228,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 4,
+          "Nội thành": 139,
+          "Khu Tây": 799
+        },
+        "shares": {
+          "Khu Đông": 0.2826486817903127,
+          "Khu Nam": 0.13979153893316984,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.002452483139178418,
+          "Nội thành": 0.08522378908645004,
+          "Khu Tây": 0.489883507050889
+        }
+      },
+      {
+        "month": "2024-07",
+        "label": "T7/2024",
+        "total": 2950,
+        "counts": {
+          "Khu Đông": 795,
+          "Khu Nam": 350,
+          "Khu Bắc": 1,
+          "Khu Trung tâm": 9,
+          "Nội thành": 276,
+          "Khu Tây": 1519
+        },
+        "shares": {
+          "Khu Đông": 0.26949152542372884,
+          "Khu Nam": 0.11864406779661017,
+          "Khu Bắc": 0.00033898305084745765,
+          "Khu Trung tâm": 0.0030508474576271187,
+          "Nội thành": 0.0935593220338983,
+          "Khu Tây": 0.5149152542372881
+        }
+      },
+      {
+        "month": "2024-08",
+        "label": "T8/2024",
+        "total": 2595,
+        "counts": {
+          "Khu Đông": 842,
+          "Khu Nam": 305,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 4,
+          "Nội thành": 180,
+          "Khu Tây": 1264
+        },
+        "shares": {
+          "Khu Đông": 0.3244701348747592,
+          "Khu Nam": 0.11753371868978806,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0015414258188824663,
+          "Nội thành": 0.06936416184971098,
+          "Khu Tây": 0.48709055876685936
+        }
+      },
+      {
+        "month": "2024-09",
+        "label": "T9/2024",
+        "total": 2893,
+        "counts": {
+          "Khu Đông": 907,
+          "Khu Nam": 399,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 9,
+          "Nội thành": 146,
+          "Khu Tây": 1432
+        },
+        "shares": {
+          "Khu Đông": 0.31351538195644657,
+          "Khu Nam": 0.1379191151054269,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0031109574835810577,
+          "Nội thành": 0.05046664362253716,
+          "Khu Tây": 0.4949879018320083
+        }
+      },
+      {
+        "month": "2024-10",
+        "label": "T10/2024",
+        "total": 2684,
+        "counts": {
+          "Khu Đông": 808,
+          "Khu Nam": 373,
+          "Khu Bắc": 1,
+          "Khu Trung tâm": 11,
+          "Nội thành": 146,
+          "Khu Tây": 1345
+        },
+        "shares": {
+          "Khu Đông": 0.30104321907600595,
+          "Khu Nam": 0.13897168405365126,
+          "Khu Bắc": 0.00037257824143070045,
+          "Khu Trung tâm": 0.004098360655737705,
+          "Nội thành": 0.05439642324888227,
+          "Khu Tây": 0.5011177347242921
+        }
+      },
+      {
+        "month": "2024-11",
+        "label": "T11/2024",
+        "total": 2742,
+        "counts": {
+          "Khu Đông": 808,
+          "Khu Nam": 361,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 17,
+          "Nội thành": 160,
+          "Khu Tây": 1396
+        },
+        "shares": {
+          "Khu Đông": 0.2946754194018964,
+          "Khu Nam": 0.13165572574762946,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.006199854121079504,
+          "Nội thành": 0.058351568198395334,
+          "Khu Tây": 0.5091174325309993
+        }
+      },
+      {
+        "month": "2024-12",
+        "label": "T12/2024",
+        "total": 2472,
+        "counts": {
+          "Khu Đông": 637,
+          "Khu Nam": 338,
+          "Khu Bắc": 23,
+          "Khu Trung tâm": 13,
+          "Nội thành": 165,
+          "Khu Tây": 1296
+        },
+        "shares": {
+          "Khu Đông": 0.2576860841423948,
+          "Khu Nam": 0.13673139158576053,
+          "Khu Bắc": 0.0093042071197411,
+          "Khu Trung tâm": 0.0052588996763754045,
+          "Nội thành": 0.06674757281553398,
+          "Khu Tây": 0.5242718446601942
+        }
+      },
+      {
+        "month": "2025-01",
+        "label": "T1/2025",
+        "total": 1715,
+        "counts": {
+          "Khu Đông": 405,
+          "Khu Nam": 200,
+          "Khu Bắc": 59,
+          "Khu Trung tâm": 8,
+          "Nội thành": 107,
+          "Khu Tây": 936
+        },
+        "shares": {
+          "Khu Đông": 0.23615160349854228,
+          "Khu Nam": 0.11661807580174927,
+          "Khu Bắc": 0.03440233236151603,
+          "Khu Trung tâm": 0.004664723032069971,
+          "Nội thành": 0.06239067055393586,
+          "Khu Tây": 0.5457725947521865
+        }
+      },
+      {
+        "month": "2025-02",
+        "label": "T2/2025",
+        "total": 1090,
+        "counts": {
+          "Khu Đông": 220,
+          "Khu Nam": 152,
+          "Khu Bắc": 45,
+          "Khu Trung tâm": 6,
+          "Nội thành": 58,
+          "Khu Tây": 609
+        },
+        "shares": {
+          "Khu Đông": 0.2018348623853211,
+          "Khu Nam": 0.13944954128440368,
+          "Khu Bắc": 0.04128440366972477,
+          "Khu Trung tâm": 0.005504587155963303,
+          "Nội thành": 0.05321100917431193,
+          "Khu Tây": 0.5587155963302752
+        }
+      },
+      {
+        "month": "2025-03",
+        "label": "T3/2025",
+        "total": 2540,
+        "counts": {
+          "Khu Đông": 608,
+          "Khu Nam": 241,
+          "Khu Bắc": 36,
+          "Khu Trung tâm": 7,
+          "Nội thành": 196,
+          "Khu Tây": 1452
+        },
+        "shares": {
+          "Khu Đông": 0.23937007874015748,
+          "Khu Nam": 0.09488188976377952,
+          "Khu Bắc": 0.014173228346456693,
+          "Khu Trung tâm": 0.0027559055118110236,
+          "Nội thành": 0.07716535433070866,
+          "Khu Tây": 0.5716535433070866
+        }
+      },
+      {
+        "month": "2025-04",
+        "label": "T4/2025",
+        "total": 3611,
+        "counts": {
+          "Khu Đông": 893,
+          "Khu Nam": 365,
+          "Khu Bắc": 91,
+          "Khu Trung tâm": 11,
+          "Nội thành": 224,
+          "Khu Tây": 2027
+        },
+        "shares": {
+          "Khu Đông": 0.24729991692052064,
+          "Khu Nam": 0.10108003323179175,
+          "Khu Bắc": 0.025200775408474107,
+          "Khu Trung tâm": 0.0030462475768485184,
+          "Nội thành": 0.06203267792855165,
+          "Khu Tây": 0.5613403489338133
+        }
+      },
+      {
+        "month": "2025-05",
+        "label": "T5/2025",
+        "total": 2823,
+        "counts": {
+          "Khu Đông": 782,
+          "Khu Nam": 292,
+          "Khu Bắc": 26,
+          "Khu Trung tâm": 8,
+          "Nội thành": 165,
+          "Khu Tây": 1550
+        },
+        "shares": {
+          "Khu Đông": 0.27701027275947576,
+          "Khu Nam": 0.10343606092809068,
+          "Khu Bắc": 0.009210060219624512,
+          "Khu Trung tâm": 0.0028338646829613886,
+          "Nội thành": 0.05844845908607864,
+          "Khu Tây": 0.549061282323769
+        }
+      },
+      {
+        "month": "2025-06",
+        "label": "T6/2025",
+        "total": 3121,
+        "counts": {
+          "Khu Đông": 802,
+          "Khu Nam": 268,
+          "Khu Bắc": 37,
+          "Khu Trung tâm": 1,
+          "Nội thành": 160,
+          "Khu Tây": 1853
+        },
+        "shares": {
+          "Khu Đông": 0.25696892021787887,
+          "Khu Nam": 0.08586991348926626,
+          "Khu Bắc": 0.011855174623518103,
+          "Khu Trung tâm": 0.0003204101249599487,
+          "Nội thành": 0.0512656199935918,
+          "Khu Tây": 0.593719961550785
+        }
+      },
+      {
+        "month": "2025-07",
+        "label": "T7/2025",
+        "total": 3414,
+        "counts": {
+          "Khu Đông": 1030,
+          "Khu Nam": 281,
+          "Khu Bắc": 51,
+          "Khu Trung tâm": 6,
+          "Nội thành": 251,
+          "Khu Tây": 1795
+        },
+        "shares": {
+          "Khu Đông": 0.30169888693614527,
+          "Khu Nam": 0.08230814294083187,
+          "Khu Bắc": 0.014938488576449912,
+          "Khu Trung tâm": 0.0017574692442882249,
+          "Nội thành": 0.07352079671939074,
+          "Khu Tây": 0.525776215582894
+        }
+      },
+      {
+        "month": "2025-08",
+        "label": "T8/2025",
+        "total": 4188,
+        "counts": {
+          "Khu Đông": 1502,
+          "Khu Nam": 254,
+          "Khu Bắc": 40,
+          "Khu Trung tâm": 3,
+          "Nội thành": 375,
+          "Khu Tây": 2014
+        },
+        "shares": {
+          "Khu Đông": 0.35864374403056354,
+          "Khu Nam": 0.060649474689589304,
+          "Khu Bắc": 0.009551098376313277,
+          "Khu Trung tâm": 0.0007163323782234957,
+          "Nội thành": 0.08954154727793696,
+          "Khu Tây": 0.48089780324737347
+        }
+      },
+      {
+        "month": "2025-09",
+        "label": "T9/2025",
+        "total": 3236,
+        "counts": {
+          "Khu Đông": 1390,
+          "Khu Nam": 165,
+          "Khu Bắc": 44,
+          "Khu Trung tâm": 1,
+          "Nội thành": 255,
+          "Khu Tây": 1381
+        },
+        "shares": {
+          "Khu Đông": 0.4295426452410383,
+          "Khu Nam": 0.05098887515451174,
+          "Khu Bắc": 0.013597033374536464,
+          "Khu Trung tâm": 0.00030902348578491963,
+          "Nội thành": 0.0788009888751545,
+          "Khu Tây": 0.426761433868974
+        }
+      },
+      {
+        "month": "2025-10",
+        "label": "T10/2025",
+        "total": 4000,
+        "counts": {
+          "Khu Đông": 1628,
+          "Khu Nam": 240,
+          "Khu Bắc": 53,
+          "Khu Trung tâm": 6,
+          "Nội thành": 297,
+          "Khu Tây": 1776
+        },
+        "shares": {
+          "Khu Đông": 0.407,
+          "Khu Nam": 0.06,
+          "Khu Bắc": 0.01325,
+          "Khu Trung tâm": 0.0015,
+          "Nội thành": 0.07425,
+          "Khu Tây": 0.444
+        }
+      },
+      {
+        "month": "2025-11",
+        "label": "T11/2025",
+        "total": 3177,
+        "counts": {
+          "Khu Đông": 1037,
+          "Khu Nam": 293,
+          "Khu Bắc": 67,
+          "Khu Trung tâm": 2,
+          "Nội thành": 226,
+          "Khu Tây": 1552
+        },
+        "shares": {
+          "Khu Đông": 0.3264085615360403,
+          "Khu Nam": 0.09222536984576644,
+          "Khu Bắc": 0.021089077746301543,
+          "Khu Trung tâm": 0.0006295247088448222,
+          "Nội thành": 0.0711362920994649,
+          "Khu Tây": 0.488511174063582
+        }
+      },
+      {
+        "month": "2025-12",
+        "label": "T12/2025",
+        "total": 2635,
+        "counts": {
+          "Khu Đông": 772,
+          "Khu Nam": 195,
+          "Khu Bắc": 61,
+          "Khu Trung tâm": 1,
+          "Nội thành": 213,
+          "Khu Tây": 1393
+        },
+        "shares": {
+          "Khu Đông": 0.29297912713472485,
+          "Khu Nam": 0.07400379506641366,
+          "Khu Bắc": 0.02314990512333966,
+          "Khu Trung tâm": 0.0003795066413662239,
+          "Nội thành": 0.0808349146110057,
+          "Khu Tây": 0.5286527514231499
+        }
+      },
+      {
+        "month": "2026-01",
+        "label": "T1/2026",
+        "total": 1685,
+        "counts": {
+          "Khu Đông": 422,
+          "Khu Nam": 108,
+          "Khu Bắc": 50,
+          "Khu Trung tâm": 5,
+          "Nội thành": 137,
+          "Khu Tây": 963
+        },
+        "shares": {
+          "Khu Đông": 0.25044510385756674,
+          "Khu Nam": 0.06409495548961425,
+          "Khu Bắc": 0.02967359050445104,
+          "Khu Trung tâm": 0.002967359050445104,
+          "Nội thành": 0.08130563798219585,
+          "Khu Tây": 0.571513353115727
+        }
+      },
+      {
+        "month": "2026-02",
+        "label": "T2/2026",
+        "total": 1127,
+        "counts": {
+          "Khu Đông": 297,
+          "Khu Nam": 68,
+          "Khu Bắc": 16,
+          "Khu Trung tâm": 5,
+          "Nội thành": 85,
+          "Khu Tây": 656
+        },
+        "shares": {
+          "Khu Đông": 0.26353149955634425,
+          "Khu Nam": 0.06033717834960071,
+          "Khu Bắc": 0.01419698314108252,
+          "Khu Trung tâm": 0.0044365572315882874,
+          "Nội thành": 0.07542147293700088,
+          "Khu Tây": 0.5820763087843833
+        }
+      },
+      {
+        "month": "2026-03",
+        "label": "T3/2026",
+        "total": 1036,
+        "counts": {
+          "Khu Đông": 230,
+          "Khu Nam": 94,
+          "Khu Bắc": 19,
+          "Khu Trung tâm": 3,
+          "Nội thành": 109,
+          "Khu Tây": 581
+        },
+        "shares": {
+          "Khu Đông": 0.222007722007722,
+          "Khu Nam": 0.09073359073359073,
+          "Khu Bắc": 0.01833976833976834,
+          "Khu Trung tâm": 0.0028957528957528956,
+          "Nội thành": 0.10521235521235521,
+          "Khu Tây": 0.5608108108108109
+        }
+      },
+      {
+        "month": "2026-04",
+        "label": "T4/2026",
+        "total": 1432,
+        "counts": {
+          "Khu Đông": 359,
+          "Khu Nam": 105,
+          "Khu Bắc": 37,
+          "Khu Trung tâm": 3,
+          "Nội thành": 114,
+          "Khu Tây": 814
+        },
+        "shares": {
+          "Khu Đông": 0.2506983240223464,
+          "Khu Nam": 0.07332402234636871,
+          "Khu Bắc": 0.025837988826815643,
+          "Khu Trung tâm": 0.002094972067039106,
+          "Nội thành": 0.07960893854748603,
+          "Khu Tây": 0.5684357541899442
+        }
+      },
+      {
+        "month": "2026-05",
+        "label": "T5/2026",
+        "total": 1095,
+        "counts": {
+          "Khu Đông": 336,
+          "Khu Nam": 94,
+          "Khu Bắc": 48,
+          "Khu Trung tâm": 1,
+          "Nội thành": 126,
+          "Khu Tây": 490
+        },
+        "shares": {
+          "Khu Đông": 0.30684931506849317,
+          "Khu Nam": 0.08584474885844749,
+          "Khu Bắc": 0.043835616438356165,
+          "Khu Trung tâm": 0.0009132420091324201,
+          "Nội thành": 0.11506849315068493,
+          "Khu Tây": 0.4474885844748858
+        }
+      },
+      {
+        "month": "2026-06",
+        "label": "T6/2026",
+        "total": 1182,
+        "counts": {
+          "Khu Đông": 352,
+          "Khu Nam": 37,
+          "Khu Bắc": 8,
+          "Khu Trung tâm": 284,
+          "Nội thành": 174,
+          "Khu Tây": 327
+        },
+        "shares": {
+          "Khu Đông": 0.29780033840947545,
+          "Khu Nam": 0.031302876480541454,
+          "Khu Bắc": 0.00676818950930626,
+          "Khu Trung tâm": 0.24027072758037224,
+          "Nội thành": 0.14720812182741116,
+          "Khu Tây": 0.2766497461928934
+        }
+      },
+      {
+        "month": "2026-07",
+        "label": "T7/2026",
+        "total": 0,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        },
+        "shares": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        }
+      }
+    ],
+    "landed_house": [
+      {
+        "month": "2023-01",
+        "label": "T1/2023",
+        "total": 0,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        },
+        "shares": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        }
+      },
+      {
+        "month": "2023-02",
+        "label": "T2/2023",
+        "total": 0,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        },
+        "shares": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        }
+      },
+      {
+        "month": "2023-03",
+        "label": "T3/2023",
+        "total": 0,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        },
+        "shares": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        }
+      },
+      {
+        "month": "2023-04",
+        "label": "T4/2023",
+        "total": 0,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        },
+        "shares": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        }
+      },
+      {
+        "month": "2023-05",
+        "label": "T5/2023",
+        "total": 0,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        },
+        "shares": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        }
+      },
+      {
+        "month": "2023-06",
+        "label": "T6/2023",
+        "total": 0,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        },
+        "shares": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        }
+      },
+      {
+        "month": "2023-08",
+        "label": "T8/2023",
+        "total": 0,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        },
+        "shares": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        }
+      },
+      {
+        "month": "2023-09",
+        "label": "T9/2023",
+        "total": 0,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        },
+        "shares": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 0,
+          "Khu Tây": 0
+        }
+      },
+      {
+        "month": "2023-10",
+        "label": "T10/2023",
+        "total": 536,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 225,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 5,
+          "Nội thành": 111,
+          "Khu Tây": 195
+        },
+        "shares": {
+          "Khu Đông": 0.0,
+          "Khu Nam": 0.4197761194029851,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.009328358208955223,
+          "Nội thành": 0.20708955223880596,
+          "Khu Tây": 0.36380597014925375
+        }
+      },
+      {
+        "month": "2023-11",
+        "label": "T11/2023",
+        "total": 632,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 281,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 4,
+          "Nội thành": 130,
+          "Khu Tây": 217
+        },
+        "shares": {
+          "Khu Đông": 0.0,
+          "Khu Nam": 0.44462025316455694,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.006329113924050633,
+          "Nội thành": 0.20569620253164558,
+          "Khu Tây": 0.34335443037974683
+        }
+      },
+      {
+        "month": "2023-12",
+        "label": "T12/2023",
+        "total": 2474,
+        "counts": {
+          "Khu Đông": 612,
+          "Khu Nam": 360,
+          "Khu Bắc": 9,
+          "Khu Trung tâm": 22,
+          "Nội thành": 408,
+          "Khu Tây": 1063
+        },
+        "shares": {
+          "Khu Đông": 0.24737267582861763,
+          "Khu Nam": 0.14551333872271624,
+          "Khu Bắc": 0.003637833468067906,
+          "Khu Trung tâm": 0.00889248181083266,
+          "Nội thành": 0.16491511721907842,
+          "Khu Tây": 0.4296685529506871
+        }
+      },
+      {
+        "month": "2024-01",
+        "label": "T1/2024",
+        "total": 2747,
+        "counts": {
+          "Khu Đông": 627,
+          "Khu Nam": 324,
+          "Khu Bắc": 7,
+          "Khu Trung tâm": 22,
+          "Nội thành": 462,
+          "Khu Tây": 1305
+        },
+        "shares": {
+          "Khu Đông": 0.22824899890789951,
+          "Khu Nam": 0.11794685111030215,
+          "Khu Bắc": 0.0025482344375682563,
+          "Khu Trung tâm": 0.008008736803785948,
+          "Nội thành": 0.1681834728795049,
+          "Khu Tây": 0.4750637058609392
+        }
+      },
+      {
+        "month": "2024-02",
+        "label": "T2/2024",
+        "total": 1909,
+        "counts": {
+          "Khu Đông": 439,
+          "Khu Nam": 150,
+          "Khu Bắc": 5,
+          "Khu Trung tâm": 23,
+          "Nội thành": 336,
+          "Khu Tây": 956
+        },
+        "shares": {
+          "Khu Đông": 0.22996333158721843,
+          "Khu Nam": 0.0785751702462022,
+          "Khu Bắc": 0.0026191723415400735,
+          "Khu Trung tâm": 0.012048192771084338,
+          "Nội thành": 0.17600838135149294,
+          "Khu Tây": 0.500785751702462
+        }
+      },
+      {
+        "month": "2024-03",
+        "label": "T3/2024",
+        "total": 3738,
+        "counts": {
+          "Khu Đông": 823,
+          "Khu Nam": 416,
+          "Khu Bắc": 6,
+          "Khu Trung tâm": 23,
+          "Nội thành": 659,
+          "Khu Tây": 1811
+        },
+        "shares": {
+          "Khu Đông": 0.22017121455323702,
+          "Khu Nam": 0.11128945960406635,
+          "Khu Bắc": 0.0016051364365971107,
+          "Khu Trung tâm": 0.006153023006955591,
+          "Nội thành": 0.17629748528624933,
+          "Khu Tây": 0.4844836811128946
+        }
+      },
+      {
+        "month": "2024-04",
+        "label": "T4/2024",
+        "total": 5299,
+        "counts": {
+          "Khu Đông": 1465,
+          "Khu Nam": 634,
+          "Khu Bắc": 45,
+          "Khu Trung tâm": 59,
+          "Nội thành": 925,
+          "Khu Tây": 2171
+        },
+        "shares": {
+          "Khu Đông": 0.2764672579732025,
+          "Khu Nam": 0.11964521607850538,
+          "Khu Bắc": 0.008492168333647859,
+          "Khu Trung tâm": 0.011134176259671636,
+          "Nội thành": 0.17456123796942818,
+          "Khu Tây": 0.40969994338554444
+        }
+      },
+      {
+        "month": "2024-05",
+        "label": "T5/2024",
+        "total": 3726,
+        "counts": {
+          "Khu Đông": 1068,
+          "Khu Nam": 442,
+          "Khu Bắc": 9,
+          "Khu Trung tâm": 36,
+          "Nội thành": 735,
+          "Khu Tây": 1436
+        },
+        "shares": {
+          "Khu Đông": 0.286634460547504,
+          "Khu Nam": 0.11862587224906065,
+          "Khu Bắc": 0.0024154589371980675,
+          "Khu Trung tâm": 0.00966183574879227,
+          "Nội thành": 0.1972624798711755,
+          "Khu Tây": 0.38539989264626945
+        }
+      },
+      {
+        "month": "2024-06",
+        "label": "T6/2024",
+        "total": 3545,
+        "counts": {
+          "Khu Đông": 1167,
+          "Khu Nam": 401,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 34,
+          "Nội thành": 636,
+          "Khu Tây": 1307
+        },
+        "shares": {
+          "Khu Đông": 0.3291960507757405,
+          "Khu Nam": 0.11311706629055007,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.009590973201692525,
+          "Nội thành": 0.17940761636107194,
+          "Khu Tây": 0.368688293370945
+        }
+      },
+      {
+        "month": "2024-07",
+        "label": "T7/2024",
+        "total": 3450,
+        "counts": {
+          "Khu Đông": 1078,
+          "Khu Nam": 389,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 37,
+          "Nội thành": 594,
+          "Khu Tây": 1352
+        },
+        "shares": {
+          "Khu Đông": 0.312463768115942,
+          "Khu Nam": 0.1127536231884058,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.010724637681159421,
+          "Nội thành": 0.17217391304347826,
+          "Khu Tây": 0.3918840579710145
+        }
+      },
+      {
+        "month": "2024-08",
+        "label": "T8/2024",
+        "total": 3887,
+        "counts": {
+          "Khu Đông": 1081,
+          "Khu Nam": 324,
+          "Khu Bắc": 777,
+          "Khu Trung tâm": 42,
+          "Nội thành": 455,
+          "Khu Tây": 1208
+        },
+        "shares": {
+          "Khu Đông": 0.2781065088757396,
+          "Khu Nam": 0.08335477231798302,
+          "Khu Bắc": 0.19989709287368151,
+          "Khu Trung tâm": 0.010805248263442244,
+          "Nội thành": 0.11705685618729098,
+          "Khu Tây": 0.3107795214818626
+        }
+      },
+      {
+        "month": "2024-09",
+        "label": "T9/2024",
+        "total": 3094,
+        "counts": {
+          "Khu Đông": 1042,
+          "Khu Nam": 257,
+          "Khu Bắc": 3,
+          "Khu Trung tâm": 33,
+          "Nội thành": 554,
+          "Khu Tây": 1205
+        },
+        "shares": {
+          "Khu Đông": 0.3367808661926309,
+          "Khu Nam": 0.08306399482870071,
+          "Khu Bắc": 0.0009696186166774402,
+          "Khu Trung tâm": 0.010665804783451843,
+          "Nội thành": 0.1790562378797673,
+          "Khu Tây": 0.3894634776987718
+        }
+      },
+      {
+        "month": "2024-10",
+        "label": "T10/2024",
+        "total": 3556,
+        "counts": {
+          "Khu Đông": 1130,
+          "Khu Nam": 381,
+          "Khu Bắc": 13,
+          "Khu Trung tâm": 36,
+          "Nội thành": 629,
+          "Khu Tây": 1367
+        },
+        "shares": {
+          "Khu Đông": 0.3177727784026997,
+          "Khu Nam": 0.10714285714285714,
+          "Khu Bắc": 0.003655793025871766,
+          "Khu Trung tâm": 0.010123734533183352,
+          "Nội thành": 0.17688413948256468,
+          "Khu Tây": 0.3844206974128234
+        }
+      },
+      {
+        "month": "2024-11",
+        "label": "T11/2024",
+        "total": 3357,
+        "counts": {
+          "Khu Đông": 969,
+          "Khu Nam": 355,
+          "Khu Bắc": 9,
+          "Khu Trung tâm": 46,
+          "Nội thành": 694,
+          "Khu Tây": 1284
+        },
+        "shares": {
+          "Khu Đông": 0.28865058087578194,
+          "Khu Nam": 0.10574918081620495,
+          "Khu Bắc": 0.002680965147453083,
+          "Khu Trung tâm": 0.013702710753649091,
+          "Nội thành": 0.20673220137027107,
+          "Khu Tây": 0.38248436103663985
+        }
+      },
+      {
+        "month": "2024-12",
+        "label": "T12/2024",
+        "total": 3710,
+        "counts": {
+          "Khu Đông": 816,
+          "Khu Nam": 311,
+          "Khu Bắc": 581,
+          "Khu Trung tâm": 51,
+          "Nội thành": 446,
+          "Khu Tây": 1505
+        },
+        "shares": {
+          "Khu Đông": 0.21994609164420484,
+          "Khu Nam": 0.08382749326145553,
+          "Khu Bắc": 0.15660377358490565,
+          "Khu Trung tâm": 0.013746630727762802,
+          "Nội thành": 0.12021563342318059,
+          "Khu Tây": 0.4056603773584906
+        }
+      },
+      {
+        "month": "2025-01",
+        "label": "T1/2025",
+        "total": 2405,
+        "counts": {
+          "Khu Đông": 479,
+          "Khu Nam": 153,
+          "Khu Bắc": 487,
+          "Khu Trung tâm": 43,
+          "Nội thành": 363,
+          "Khu Tây": 880
+        },
+        "shares": {
+          "Khu Đông": 0.19916839916839918,
+          "Khu Nam": 0.06361746361746362,
+          "Khu Bắc": 0.2024948024948025,
+          "Khu Trung tâm": 0.01787941787941788,
+          "Nội thành": 0.15093555093555094,
+          "Khu Tây": 0.3659043659043659
+        }
+      },
+      {
+        "month": "2025-02",
+        "label": "T2/2025",
+        "total": 1070,
+        "counts": {
+          "Khu Đông": 249,
+          "Khu Nam": 90,
+          "Khu Bắc": 223,
+          "Khu Trung tâm": 11,
+          "Nội thành": 175,
+          "Khu Tây": 322
+        },
+        "shares": {
+          "Khu Đông": 0.23271028037383176,
+          "Khu Nam": 0.08411214953271028,
+          "Khu Bắc": 0.20841121495327103,
+          "Khu Trung tâm": 0.010280373831775701,
+          "Nội thành": 0.16355140186915887,
+          "Khu Tây": 0.30093457943925234
+        }
+      },
+      {
+        "month": "2025-03",
+        "label": "T3/2025",
+        "total": 2520,
+        "counts": {
+          "Khu Đông": 504,
+          "Khu Nam": 220,
+          "Khu Bắc": 709,
+          "Khu Trung tâm": 19,
+          "Nội thành": 344,
+          "Khu Tây": 724
+        },
+        "shares": {
+          "Khu Đông": 0.2,
+          "Khu Nam": 0.0873015873015873,
+          "Khu Bắc": 0.28134920634920635,
+          "Khu Trung tâm": 0.00753968253968254,
+          "Nội thành": 0.1365079365079365,
+          "Khu Tây": 0.2873015873015873
+        }
+      },
+      {
+        "month": "2025-04",
+        "label": "T4/2025",
+        "total": 5085,
+        "counts": {
+          "Khu Đông": 978,
+          "Khu Nam": 430,
+          "Khu Bắc": 1258,
+          "Khu Trung tâm": 56,
+          "Nội thành": 761,
+          "Khu Tây": 1602
+        },
+        "shares": {
+          "Khu Đông": 0.19233038348082596,
+          "Khu Nam": 0.08456243854473942,
+          "Khu Bắc": 0.24739429695181908,
+          "Khu Trung tâm": 0.011012782694198623,
+          "Nội thành": 0.1496558505408063,
+          "Khu Tây": 0.31504424778761064
+        }
+      },
+      {
+        "month": "2025-05",
+        "label": "T5/2025",
+        "total": 4023,
+        "counts": {
+          "Khu Đông": 872,
+          "Khu Nam": 373,
+          "Khu Bắc": 804,
+          "Khu Trung tâm": 39,
+          "Nội thành": 596,
+          "Khu Tây": 1339
+        },
+        "shares": {
+          "Khu Đông": 0.21675366641809596,
+          "Khu Nam": 0.09271687795177729,
+          "Khu Bắc": 0.19985085756897839,
+          "Khu Trung tâm": 0.009694258016405667,
+          "Nội thành": 0.14814814814814814,
+          "Khu Tây": 0.3328361918965946
+        }
+      },
+      {
+        "month": "2025-06",
+        "label": "T6/2025",
+        "total": 3903,
+        "counts": {
+          "Khu Đông": 890,
+          "Khu Nam": 389,
+          "Khu Bắc": 690,
+          "Khu Trung tâm": 37,
+          "Nội thành": 600,
+          "Khu Tây": 1297
+        },
+        "shares": {
+          "Khu Đông": 0.2280297207276454,
+          "Khu Nam": 0.09966692287983603,
+          "Khu Bắc": 0.1767870868562644,
+          "Khu Trung tâm": 0.009479887266205482,
+          "Nội thành": 0.15372790161414296,
+          "Khu Tây": 0.33230848065590574
+        }
+      },
+      {
+        "month": "2025-07",
+        "label": "T7/2025",
+        "total": 2580,
+        "counts": {
+          "Khu Đông": 611,
+          "Khu Nam": 244,
+          "Khu Bắc": 390,
+          "Khu Trung tâm": 27,
+          "Nội thành": 430,
+          "Khu Tây": 878
+        },
+        "shares": {
+          "Khu Đông": 0.23682170542635658,
+          "Khu Nam": 0.09457364341085271,
+          "Khu Bắc": 0.1511627906976744,
+          "Khu Trung tâm": 0.010465116279069767,
+          "Nội thành": 0.16666666666666666,
+          "Khu Tây": 0.34031007751937986
+        }
+      },
+      {
+        "month": "2025-08",
+        "label": "T8/2025",
+        "total": 2844,
+        "counts": {
+          "Khu Đông": 682,
+          "Khu Nam": 285,
+          "Khu Bắc": 405,
+          "Khu Trung tâm": 30,
+          "Nội thành": 479,
+          "Khu Tây": 963
+        },
+        "shares": {
+          "Khu Đông": 0.23980309423347398,
+          "Khu Nam": 0.10021097046413502,
+          "Khu Bắc": 0.14240506329113925,
+          "Khu Trung tâm": 0.010548523206751054,
+          "Nội thành": 0.16842475386779185,
+          "Khu Tây": 0.33860759493670883
+        }
+      },
+      {
+        "month": "2025-09",
+        "label": "T9/2025",
+        "total": 2159,
+        "counts": {
+          "Khu Đông": 482,
+          "Khu Nam": 198,
+          "Khu Bắc": 338,
+          "Khu Trung tâm": 36,
+          "Nội thành": 346,
+          "Khu Tây": 759
+        },
+        "shares": {
+          "Khu Đông": 0.22325150532654006,
+          "Khu Nam": 0.09170912459471978,
+          "Khu Bắc": 0.15655396016674386,
+          "Khu Trung tâm": 0.01667438628994905,
+          "Nội thành": 0.1602593793422881,
+          "Khu Tây": 0.35155164427975916
+        }
+      },
+      {
+        "month": "2025-10",
+        "label": "T10/2025",
+        "total": 3551,
+        "counts": {
+          "Khu Đông": 946,
+          "Khu Nam": 347,
+          "Khu Bắc": 457,
+          "Khu Trung tâm": 34,
+          "Nội thành": 560,
+          "Khu Tây": 1207
+        },
+        "shares": {
+          "Khu Đông": 0.26640382990706846,
+          "Khu Nam": 0.09771895240777245,
+          "Khu Bắc": 0.1286961419318502,
+          "Khu Trung tâm": 0.009574767671078569,
+          "Nội thành": 0.15770205575894114,
+          "Khu Tây": 0.3399042523232892
+        }
+      },
+      {
+        "month": "2025-11",
+        "label": "T11/2025",
+        "total": 3292,
+        "counts": {
+          "Khu Đông": 719,
+          "Khu Nam": 301,
+          "Khu Bắc": 543,
+          "Khu Trung tâm": 39,
+          "Nội thành": 559,
+          "Khu Tây": 1131
+        },
+        "shares": {
+          "Khu Đông": 0.21840826245443498,
+          "Khu Nam": 0.09143377885783718,
+          "Khu Bắc": 0.1649453219927096,
+          "Khu Trung tâm": 0.011846901579586877,
+          "Nội thành": 0.1698055893074119,
+          "Khu Tây": 0.34356014580801947
+        }
+      },
+      {
+        "month": "2025-12",
+        "label": "T12/2025",
+        "total": 3326,
+        "counts": {
+          "Khu Đông": 912,
+          "Khu Nam": 318,
+          "Khu Bắc": 517,
+          "Khu Trung tâm": 28,
+          "Nội thành": 574,
+          "Khu Tây": 977
+        },
+        "shares": {
+          "Khu Đông": 0.2742032471437162,
+          "Khu Nam": 0.09561034275405893,
+          "Khu Bắc": 0.1554419723391461,
+          "Khu Trung tâm": 0.00841852074564041,
+          "Nội thành": 0.17257967528562837,
+          "Khu Tây": 0.29374624173180997
+        }
+      },
+      {
+        "month": "2026-01",
+        "label": "T1/2026",
+        "total": 2349,
+        "counts": {
+          "Khu Đông": 515,
+          "Khu Nam": 208,
+          "Khu Bắc": 482,
+          "Khu Trung tâm": 27,
+          "Nội thành": 430,
+          "Khu Tây": 687
+        },
+        "shares": {
+          "Khu Đông": 0.2192422307364836,
+          "Khu Nam": 0.0885483184333759,
+          "Khu Bắc": 0.205193699446573,
+          "Khu Trung tâm": 0.011494252873563218,
+          "Nội thành": 0.18305661983822905,
+          "Khu Tây": 0.29246487867177523
+        }
+      },
+      {
+        "month": "2026-02",
+        "label": "T2/2026",
+        "total": 1826,
+        "counts": {
+          "Khu Đông": 437,
+          "Khu Nam": 143,
+          "Khu Bắc": 374,
+          "Khu Trung tâm": 27,
+          "Nội thành": 263,
+          "Khu Tây": 582
+        },
+        "shares": {
+          "Khu Đông": 0.2393209200438116,
+          "Khu Nam": 0.0783132530120482,
+          "Khu Bắc": 0.20481927710843373,
+          "Khu Trung tâm": 0.014786418400876232,
+          "Nội thành": 0.14403066812705367,
+          "Khu Tây": 0.3187294633077766
+        }
+      },
+      {
+        "month": "2026-03",
+        "label": "T3/2026",
+        "total": 1825,
+        "counts": {
+          "Khu Đông": 382,
+          "Khu Nam": 188,
+          "Khu Bắc": 482,
+          "Khu Trung tâm": 33,
+          "Nội thành": 256,
+          "Khu Tây": 484
+        },
+        "shares": {
+          "Khu Đông": 0.20931506849315068,
+          "Khu Nam": 0.10301369863013699,
+          "Khu Bắc": 0.2641095890410959,
+          "Khu Trung tâm": 0.01808219178082192,
+          "Nội thành": 0.14027397260273972,
+          "Khu Tây": 0.2652054794520548
+        }
+      },
+      {
+        "month": "2026-04",
+        "label": "T4/2026",
+        "total": 2167,
+        "counts": {
+          "Khu Đông": 455,
+          "Khu Nam": 189,
+          "Khu Bắc": 623,
+          "Khu Trung tâm": 36,
+          "Nội thành": 256,
+          "Khu Tây": 608
+        },
+        "shares": {
+          "Khu Đông": 0.20996769727734194,
+          "Khu Nam": 0.08721735117674204,
+          "Khu Bắc": 0.2874942316566682,
+          "Khu Trung tâm": 0.01661282879556991,
+          "Nội thành": 0.11813567143516382,
+          "Khu Tây": 0.2805722196585141
+        }
+      },
+      {
+        "month": "2026-05",
+        "label": "T5/2026",
+        "total": 1737,
+        "counts": {
+          "Khu Đông": 380,
+          "Khu Nam": 189,
+          "Khu Bắc": 547,
+          "Khu Trung tâm": 17,
+          "Nội thành": 256,
+          "Khu Tây": 348
+        },
+        "shares": {
+          "Khu Đông": 0.21876799078871617,
+          "Khu Nam": 0.10880829015544041,
+          "Khu Bắc": 0.3149107656879678,
+          "Khu Trung tâm": 0.00978698906160046,
+          "Nội thành": 0.1473805411629246,
+          "Khu Tây": 0.2003454231433506
+        }
+      },
+      {
+        "month": "2026-06",
+        "label": "T6/2026",
+        "total": 754,
+        "counts": {
+          "Khu Đông": 196,
+          "Khu Nam": 42,
+          "Khu Bắc": 85,
+          "Khu Trung tâm": 44,
+          "Nội thành": 125,
+          "Khu Tây": 262
+        },
+        "shares": {
+          "Khu Đông": 0.259946949602122,
+          "Khu Nam": 0.05570291777188329,
+          "Khu Bắc": 0.11273209549071618,
+          "Khu Trung tâm": 0.058355437665782495,
+          "Nội thành": 0.16578249336870027,
+          "Khu Tây": 0.34748010610079577
+        }
+      },
+      {
+        "month": "2026-07",
+        "label": "T7/2026",
+        "total": 1,
+        "counts": {
+          "Khu Đông": 0,
+          "Khu Nam": 0,
+          "Khu Bắc": 0,
+          "Khu Trung tâm": 0,
+          "Nội thành": 1,
+          "Khu Tây": 0
+        },
+        "shares": {
+          "Khu Đông": 0.0,
+          "Khu Nam": 0.0,
+          "Khu Bắc": 0.0,
+          "Khu Trung tâm": 0.0,
+          "Nội thành": 1.0,
+          "Khu Tây": 0.0
+        }
+      }
+    ]
+  }
+}

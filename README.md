@@ -9,6 +9,9 @@ This repository contains:
 - `secondary_market_dashboard.html`: generated Hanoi secondary market dashboard
 - `secondary_market_dashboard_data.json`: exported secondary market data payload
 - `build_secondary_market_dashboard.py`: source code used to build the secondary dashboard
+- `secondary_report_dashboard.html`: generated Hanoi secondary report chart dashboard
+- `secondary_report_dashboard_data.json`: exported secondary report chart data payload
+- `build_secondary_report_dashboard.py`: source code used to build the secondary report dashboard
 
 ## Vercel Protected Deploy
 

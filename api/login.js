@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 12;
 const FALLBACK_PASSWORD_SHA256 =
-  "30a2ea6510f9fd348cf15cc8b7adf9074163a8fd1d568bf6136997b0b8c52012";
+  "cd1152cf7d7e17e5aa3eea8f5b36e1cc4bd250b1b7f8dfc32b39f9b104b9f981";
 
 function signValue(value, secret) {
   return crypto.createHmac("sha256", secret).update(value).digest("hex");
